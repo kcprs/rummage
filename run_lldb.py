@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 import re
 import sys
-from typing import Iterable
+from typing import Iterable, Optional
 
 if __name__ == "__main__":
     rel_path = os.path.relpath(os.path.abspath(__file__), os.getcwd())
@@ -27,6 +27,33 @@ https://gist.github.com/nkaretnikov/6ee00afabf73332c5a89eacb610369c2
 
 EXE = "_build/test_exe"
 ARGS = "arg1 arg2".split(" ")
+
+
+class GlobalFileWriter:
+    _instance: Optional[GlobalFileWriter] = None
+
+    def __init__(self) -> None:
+        self._files = dict()
+
+    @staticmethod
+    def instance():
+        assert (
+            GlobalFileWriter._instance is not None
+        ), "Initialise using context manager: `with FileOutput():"
+        return GlobalFileWriter._instance
+
+    def write(self, path: str, text: str):
+        if path not in self._files.keys():
+            self._files[path] = open(path, "w")
+        self._files[path].write(text)
+
+    def __enter__(self):
+        if GlobalFileWriter._instance is None:
+            GlobalFileWriter._instance = GlobalFileWriter()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        for file in GlobalFileWriter.instance()._files.values():
+            file.close()
 
 
 class Debugger:
@@ -105,21 +132,25 @@ class Breakpoint:
 def break_main(frame, bp_loc, extra_args, internal_dict):
     var = frame.FindVariable("its_an_arg")
     print(var)
+    GlobalFileWriter.instance().write("output.log", "hello from lldb")
 
     # Returning False tells lldb not to stop at the breakpoint
     return False
 
 
 def main(debugger):
-    # debugger.SetAsync(False)
+    debugger.SetAsync(False)
 
     target = debugger.CreateTarget(EXE)
-    target.SetLaunchInfo(lldb.SBLaunchInfo(ARGS))
 
     # Set breakpoints
     target = Target(target)
     b = Breakpoint.from_regex(target, "@break-main")
     b.set_callback(break_main)
+
+    # Launch
+    with GlobalFileWriter():
+        target.LaunchSimple(ARGS, None, ".")
 
 
 def __lldb_init_module(debugger, _dict):
