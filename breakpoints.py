@@ -29,3 +29,13 @@ def struct_children(frame, bp_loc, extra_args, internal_dict):
     GlobalFileWriter.instance().write("output.log", child, loc=Location(frame))
 
     return False
+
+
+def deref_pointer(frame, bp_loc, extra_args, internal_dict):
+    pointer = frame.FindVariable("point")
+    value = pointer.Dereference()
+
+    GlobalFileWriter.instance().write("output.log", pointer, loc=Location(frame))
+    GlobalFileWriter.instance().write("output.log", value, loc=Location(frame))
+
+    return False
