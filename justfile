@@ -4,6 +4,7 @@ alias f := format
 format:
 	isort .
 	black .
+    fd -e '.c' -x clang-format -i
 
 alias c := check
 check:
