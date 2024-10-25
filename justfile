@@ -2,16 +2,16 @@ default: format check
 
 alias f := format
 format:
-	isort .
-	black .
+    isort .
+    black .
     fd -e '.c' -x clang-format -i
 
 alias c := check
 check:
-	pyright --warnings .
+    pyright --warnings .
 
 update_dev_deps:
-	pip freeze > pip-requirements-dev.txt
+    pip freeze > pip-requirements-dev.txt
 
 alias b := build
 build:
