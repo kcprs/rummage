@@ -17,8 +17,8 @@ build:
     -mkdir _build
     clang -g -o _build/test_exe main.c
 
-lldb: build
+lldb: build check
     lldb -b \
     -O 'command script import loupe.py' \
-    -O 'command script import breaks.py' \
+    -O 'command script import breakpoints.py' \
     -O 'command script import run_lldb.py'

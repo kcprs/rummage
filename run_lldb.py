@@ -4,7 +4,7 @@ import inspect
 import os
 import sys
 
-import breaks
+import breakpoints
 from loupe import Breakpoint, GlobalFileWriter, Target
 
 EXE = "_build/test_exe"
@@ -15,10 +15,10 @@ def set_breakpoints(target: Target):
     print("Searching for break functions")
     break_funcs = [
         obj
-        for (name, obj) in inspect.getmembers(breaks, inspect.isfunction)
+        for (name, obj) in inspect.getmembers(breakpoints, inspect.isfunction)
         if not name.startswith("_")
     ]
-    print(f"Found break functions: {breaks}")
+    print(f"Found break functions: {breakpoints}")
 
     for func in break_funcs:
         b = Breakpoint.from_regex(target, r"@loupe\s*:\s*" + func.__name__)
