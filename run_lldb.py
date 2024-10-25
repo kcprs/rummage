@@ -6,7 +6,7 @@ import sys
 
 import __main__ as this_module
 
-import breakpoints
+import loupe_hooks
 from loupe import Breakpoint, Frame, GlobalFileWriter, Target
 
 # TODO: move these to loupe_hooks
@@ -30,7 +30,7 @@ ARGS = "arg1 arg2".split(" ")
 
 _hook_funcs = [
     obj
-    for (name, obj) in inspect.getmembers(breakpoints, inspect.isfunction)
+    for (name, obj) in inspect.getmembers(loupe_hooks, inspect.isfunction)
     if not name.startswith("_")
 ]
 
