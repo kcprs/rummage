@@ -17,6 +17,14 @@ https://gist.github.com/nkaretnikov/6ee00afabf73332c5a89eacb610369c2
 """
 
 
+class Frame:
+    def __init__(self, frame: lldb.SBFrame) -> None:
+        self._inner = frame
+
+    def var(self, name) -> lldb.SBValue:
+        return self._inner.FindVariable(name)
+
+
 class Location:
     def __init__(self, frame: lldb.SBFrame) -> None:
         line_entry = frame.GetLineEntry()

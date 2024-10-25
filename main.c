@@ -10,7 +10,7 @@ int main(int argc, char** argv) {
     float array[] = {1.f, 1.f, 2.f, 3.f};  // @loupe: break_main
     int a = some_value + argc;
     int* point = &some_value;
-    (void)0;  // @loupe: deref_pointer
+    (void)0;         // @loupe: deref_pointer
     some_value = 2;  // @loupe: index_int_array
 
     SomeStruct some_struct = {.num_blorps = 56,
