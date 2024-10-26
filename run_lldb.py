@@ -9,10 +9,6 @@ import __main__ as this_module
 import loupe_hooks
 from loupe import Breakpoint, Frame, GlobalFileWriter, Target
 
-# TODO: move these to loupe_hooks
-EXE = "_build/test_exe"
-ARGS = "arg1 arg2".split(" ")
-
 ####################################################################################################
 # Create wrapper functions for hook functions. We do this to have full control of hook function's
 # signatures. Wrappers conform to the signature required by lldb.
@@ -54,7 +50,7 @@ def _set_breakpoints(target: Target):
 def _main(debugger):
     debugger.SetAsync(False)
 
-    target = debugger.CreateTarget(EXE)
+    target = debugger.CreateTarget(loupe_hooks.EXE)
 
     _set_breakpoints(Target(target))
 
@@ -63,7 +59,7 @@ def _main(debugger):
         # TODO: This blocks only until the debugger stops at a breakpoint.
         # This is not a problem if we set ALL breakpoints to auto-continue.
         # Otherwise, we have to switch to async mode and periodically check process status.
-        target.LaunchSimple(ARGS, None, ".")
+        target.LaunchSimple(loupe_hooks.ARGS, None, ".")
 
 
 def __lldb_init_module(debugger, *_):

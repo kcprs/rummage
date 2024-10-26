@@ -1,5 +1,8 @@
 from loupe import Frame, GlobalFileWriter, Location
 
+EXE = "_build/test_exe"
+ARGS = "arg1 arg2".split(" ")
+
 
 def break_main(frame: Frame):
     frame_ = frame._inner
