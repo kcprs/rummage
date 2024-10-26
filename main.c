@@ -1,12 +1,33 @@
+#include <stdbool.h>
+
 typedef struct {
     int num_blorps;
     float avg_blorp;
     const char* just_some_chars;
 } SomeStruct;
 
+typedef int ImAnInt;
+
+void test_int() {
+    int one = 1;
+    (void)0;  // @loupe: test_int
+}
+
+void test_float() {
+    float half = 0.5f;
+    (void)0;  // @loupe: test_float
+}
+
+void run_tests() {
+    test_int();
+    test_float();
+}
+
 int main(int argc, char** argv) {
     char* its_an_arg = argv[0];
-    int some_value = 1;
+    ImAnInt some_value = 1;  // @loupe: just_checking
+    bool im_a_bool = false;  // @loupe: just_checking
+    float im_a_float = 4.8f;
     float array[] = {1.f, 1.f, 2.f, 3.f};  // @loupe: break_main
     int a = some_value + argc;
     int* point = &some_value;
@@ -17,6 +38,8 @@ int main(int argc, char** argv) {
                               .avg_blorp = 3.14f,
                               .just_some_chars = "look, it's a string!"};
     (void)0;  // @loupe: struct_children
+    (void)0;  // @loupe: break_main
 
-    return 0;  // @loupe: break_main
+    run_tests();
+    return 0;
 }

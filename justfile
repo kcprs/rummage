@@ -19,6 +19,8 @@ build:
     clang -g -o _build/test_exe main.c
 
 lldb: build check
-    lldb -b \
+    lldb \
     -O 'command script import loupe.py' \
-    -O 'command script import run_lldb.py'
+    -O 'command script import loupe_hooks.py' \
+    -O 'command script import run_lldb.py' \
+    -b \

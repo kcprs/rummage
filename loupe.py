@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import re
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Union
 
 import lldb
 
@@ -17,19 +17,154 @@ https://gist.github.com/nkaretnikov/6ee00afabf73332c5a89eacb610369c2
 """
 
 
+class StructVar: ...
+
+
+class NumericVar:
+    def __init__(self, sb_value: lldb.SBValue):
+        self._sb_value = sb_value
+        self._value = self._extract_value(sb_value)
+
+    def _extract_value(self, sb_value):
+        value_type = sb_value.GetType()
+
+        if value_type.IsPointerType() or value_type.IsArrayType():
+            raise TypeError(
+                "Pointer or array types are not supported in this wrapper class."
+            )
+
+        basic_type = value_type.GetBasicType()
+        if (
+            basic_type == lldb.eBasicTypeInt
+            or basic_type == lldb.eBasicTypeLong
+            or basic_type == lldb.eBasicTypeChar
+            or basic_type == lldb.eBasicTypeShort
+        ):
+            return sb_value.GetValueAsSigned()
+        elif (
+            basic_type == lldb.eBasicTypeUnsignedInt
+            or basic_type == lldb.eBasicTypeUnsignedLong
+            or basic_type == lldb.eBasicTypeUnsignedChar
+            or basic_type == lldb.eBasicTypeUnsignedShort
+        ):
+            return sb_value.GetValueAsUnsigned()
+        elif basic_type == lldb.eBasicTypeFloat or basic_type == lldb.eBasicTypeDouble:
+            return float(sb_value.GetValue())
+        else:
+            raise TypeError("Unsupported SBValue type for numeric operations.")
+
+    def __int__(self):
+        return int(self._value)
+
+    def __float__(self):
+        return float(self._value)
+
+    def __add__(self, other):
+        return self._value + other
+
+    def __radd__(self, other):
+        return other + self._value
+
+    def __sub__(self, other):
+        return self._value - other
+
+    def __rsub__(self, other):
+        return other - self._value
+
+    def __mul__(self, other):
+        return self._value * other
+
+    def __rmul__(self, other):
+        return other * self._value
+
+    def __truediv__(self, other):
+        return self._value / other
+
+    def __rtruediv__(self, other):
+        return other / self._value
+
+    def __floordiv__(self, other):
+        return self._value // other
+
+    def __rfloordiv__(self, other):
+        return other // self._value
+
+    def __mod__(self, other):
+        return self._value % other
+
+    def __rmod__(self, other):
+        return other % self._value
+
+    def __pow__(self, other):
+        return self._value**other
+
+    def __rpow__(self, other):
+        return other**self._value
+
+    def __neg__(self):
+        return -self._value
+
+    def __abs__(self):
+        return abs(self._value)
+
+    def __eq__(self, other):
+        return self._value == other
+
+    def __ne__(self, other):
+        return self._value != other
+
+    def __lt__(self, other):
+        return self._value < other
+
+    def __le__(self, other):
+        return self._value <= other
+
+    def __gt__(self, other):
+        return self._value > other
+
+    def __ge__(self, other):
+        return self._value >= other
+
+    def __str__(self) -> str:
+        return str(self._sb_value)
+
+    def __repr__(self):
+        return f"NumericVar({self._value})"
+
+
+class VarMetadata:
+    def __init__(self, var: NumericVar) -> None:
+        self._sb_value = var._sb_value
+        # TODO: This should be an interface for var metadata, e.g. name etc.
+
+
 class Frame:
     def __init__(self, frame: lldb.SBFrame) -> None:
         self._inner = frame
 
-    def var(self, name) -> lldb.SBValue:
-        return self._inner.FindVariable(name)
+    def var(self, name) -> Union[lldb.SBValue, NumericVar]:
+        var = self._inner.FindVariable(name)
+        assert var.IsValid(), f"Variable '{name}' not found"
+
+        try:
+            var = NumericVar(var)
+        except TypeError:
+            pass
+
+        return var
+
+    @property
+    def location(self):
+        line_entry = self._inner.GetLineEntry()
+        file_path = line_entry.GetFileSpec().GetFilename()
+        line_number = line_entry.GetLine()
+        return Location(file_path, line_number)
 
 
 class Location:
-    def __init__(self, frame: lldb.SBFrame) -> None:
-        line_entry = frame.GetLineEntry()
-        self._file_path = line_entry.GetFileSpec().GetFilename()
-        self._line_number = line_entry.GetLine()
+    def __init__(self, file_path, line_number) -> None:
+        self._file_path = file_path
+        self._line_number = line_number
 
     @property
     def file_path(self):
@@ -56,7 +191,7 @@ class GlobalFileWriter:
         ), "Initialise using context manager: `with FileOutput():"
         return GlobalFileWriter._instance
 
-    def write(self, path: str, text: str, loc: Optional[Location] = None):
+    def write(self, path: str, text, loc: Optional[Location] = None):
         file = self._files.get(path)
         if file is None:
             file = open(path, "w")
@@ -145,7 +280,7 @@ class Breakpoint:
 
         return this
 
-    def set_callback(self, cb):
-        cb_str = f"{cb.__module__}.{cb.__name__}"
+    def set_callback_via_path(self, cb_name: str):
+        print(f"Breakpoint: adding callback {cb_name}")
         for b in self._breakpoints:
-            b.SetScriptCallbackFunction(cb_str)
+            b.SetScriptCallbackFunction(cb_name)

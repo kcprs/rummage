@@ -9,42 +9,60 @@ import __main__ as this_module
 import loupe_hooks
 from loupe import Breakpoint, Frame, GlobalFileWriter, Target
 
-####################################################################################################
-# Create wrapper functions for hook functions. We do this to have full control of hook function's
-# signatures. Wrappers conform to the signature required by lldb.
-#
-# This must be done in outer scope (at module import time) so that the wrappers are visible to lldb
-# when the module is imported.
-#
-# Also, note that names of newly created wrapper functions may conceivably clash with functions
-# defined directly in this module. For that reason:
-#
-#   1. We only wrap functions with names that DON'T start with an underscore. This also has the
-#      benefit of allowing the user to write helper functions that will not be treated as hooks.
-#
-#   2. ALL functions defined in this module should have names with a leading underscore.
-
 _hook_funcs = [
     obj
     for (name, obj) in inspect.getmembers(loupe_hooks, inspect.isfunction)
     if not name.startswith("_")
 ]
 
-for hook_func in _hook_funcs:
-    # We ignore args other than `frame`
-    def wrapper(frame, *_):
-        hook_func(Frame(frame))
-        # Returning False tells lldb not to stop at the breakpoint
-        return False
 
-    setattr(this_module, hook_func.__name__, wrapper)
-####################################################################################################
+def _create_hook_wrappers():
+    """
+    Create wrapper functions for hook functions. We do this to have full control of hook function's
+    signatures. Wrappers conform to the signature required by lldb.
+
+    Also, note that names of newly created wrapper functions may conceivably clash with functions
+    defined directly in this module. For that reason:
+
+      1. We only wrap functions with names that DON'T start with an underscore. This also has the
+         benefit of allowing the user to write helper functions that will not be treated as hooks.
+
+      2. ALL functions defined in this module should have names with a leading underscore.
+    """
+
+    for hook_func in _hook_funcs:
+        print(f"Creating wrapper for hook {hook_func.__name__}")
+
+        # Must wrap wrapper creation in a function with default arg value, so that the wrapper refers
+        # to the current `hook_func`. Otherwise all wrappers would refer to the last `hook_func` in
+        # `_hook_funcs` due to late binding in Python closures.
+        def make_hook_wrapper(func=hook_func):
+            # We ignore args other than `frame`
+            def hook_wrapper(frame, *_):
+                print(f"Executing hook wrapper for hook {func.__name__}")
+                # Returning False tells lldb not to stop at the breakpoint.
+                # Hook functions may return a truthy value to request stopping at the breakpoint.
+                return bool(func(Frame(frame)))
+
+            return hook_wrapper
+
+        setattr(this_module, hook_func.__name__, make_hook_wrapper())
+
+    print("Module has functions")
+    print(inspect.getmembers(this_module, inspect.isfunction))
+
+
+# This must be done at module import time so that the wrappers are visible to lldb when the
+# module is imported.
+# TODO: This is not working. For now stick to passing hooks directly to lldb with the ugly
+# function signature.
+# _create_hook_wrappers()
 
 
 def _set_breakpoints(target: Target):
     for hook_func in _hook_funcs:
         b = Breakpoint.from_regex(target, r"@loupe\s*:\s*" + hook_func.__name__)
-        b.set_callback(getattr(this_module, hook_func.__name__))
+        b.set_callback_via_path(f"{hook_func.__module__}.{hook_func.__name__}")
 
 
 def _main(debugger):
