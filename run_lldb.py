@@ -66,8 +66,12 @@ def _main(debugger):
         target.LaunchSimple(ARGS, None, ".")
 
 
-def __lldb_init_module(debugger, _dict):
+def __lldb_init_module(debugger, *_):
     _main(debugger)
+
+
+# Just to suppress "unused private function" lints
+__lldb_init_module = __lldb_init_module
 
 
 if __name__ == "__main__":
