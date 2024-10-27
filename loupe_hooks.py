@@ -1,6 +1,6 @@
 import lldb
 
-from loupe import Frame, GlobalFileWriter
+from loupe import Frame, GlobalFileWriter, create_struct_class_from_sbvalue
 
 EXE = "_build/test_exe"
 ARGS = "arg1 arg2".split(" ")
@@ -53,6 +53,7 @@ ARGS = "arg1 arg2".split(" ")
 
 
 def test_int(_frame: lldb.SBFrame, *_):
+    print("testing int")
     frame = Frame(_frame)
     one = frame.var("one")
     assert one == 1
@@ -60,7 +61,18 @@ def test_int(_frame: lldb.SBFrame, *_):
 
 
 def test_float(_frame: lldb.SBFrame, *_):
+    print("testing float")
     frame = Frame(_frame)
     half = frame.var("half")
     assert half == 0.5
     return False
+
+
+def test_struct(_frame: lldb.SBFrame, *_):
+    print("testing struct")
+    frame = Frame(_frame)
+    _a_struct = frame.var("a_struct")
+    a_struct = create_struct_class_from_sbvalue(_a_struct)  # type: ignore
+    assert hasattr(a_struct, "a")
+    assert hasattr(a_struct, "b")
+    print("Successully tested struct")

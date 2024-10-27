@@ -18,9 +18,20 @@ void test_float() {
     (void)0;  // @loupe: test_float
 }
 
+struct TestStruct {
+    int a;
+    float b;
+};
+
+void test_struct() {
+    struct TestStruct a_struct = {.a = 1, .b = 3.67f};
+    (void)0;  // @loupe: test_struct
+}
+
 void run_tests() {
     test_int();
     test_float();
+    test_struct();
 }
 
 int main(int argc, char** argv) {

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import re
+import types
 from typing import Iterable, Optional, Union
 
 import lldb
@@ -15,6 +16,149 @@ https://lldb.llvm.org/use/python-reference.html
 https://github.com/llvm/llvm-project/tree/main/lldb/examples/python
 https://gist.github.com/nkaretnikov/6ee00afabf73332c5a89eacb610369c2
 """
+
+
+def basic_type_str(basic_type):
+    if basic_type == lldb.eBasicTypeInvalid:
+        return "lldb.eBasicTypeInvalid"
+    if basic_type == lldb.eBasicTypeVoid:
+        return "lldb.eBasicTypeVoid"
+    if basic_type == lldb.eBasicTypeChar:
+        return "lldb.eBasicTypeChar"
+    if basic_type == lldb.eBasicTypeSignedChar:
+        return "lldb.eBasicTypeSignedChar"
+    if basic_type == lldb.eBasicTypeUnsignedChar:
+        return "lldb.eBasicTypeUnsignedChar"
+    if basic_type == lldb.eBasicTypeWChar:
+        return "lldb.eBasicTypeWChar"
+    if basic_type == lldb.eBasicTypeSignedWChar:
+        return "lldb.eBasicTypeSignedWChar"
+    if basic_type == lldb.eBasicTypeUnsignedWChar:
+        return "lldb.eBasicTypeUnsignedWChar"
+    if basic_type == lldb.eBasicTypeChar16:
+        return "lldb.eBasicTypeChar16"
+    if basic_type == lldb.eBasicTypeChar32:
+        return "lldb.eBasicTypeChar32"
+    if basic_type == lldb.eBasicTypeChar8:
+        return "lldb.eBasicTypeChar8"
+    if basic_type == lldb.eBasicTypeShort:
+        return "lldb.eBasicTypeShort"
+    if basic_type == lldb.eBasicTypeUnsignedShort:
+        return "lldb.eBasicTypeUnsignedShort"
+    if basic_type == lldb.eBasicTypeInt:
+        return "lldb.eBasicTypeInt"
+    if basic_type == lldb.eBasicTypeUnsignedInt:
+        return "lldb.eBasicTypeUnsignedInt"
+    if basic_type == lldb.eBasicTypeLong:
+        return "lldb.eBasicTypeLong"
+    if basic_type == lldb.eBasicTypeUnsignedLong:
+        return "lldb.eBasicTypeUnsignedLong"
+    if basic_type == lldb.eBasicTypeLongLong:
+        return "lldb.eBasicTypeLongLong"
+    if basic_type == lldb.eBasicTypeUnsignedLongLong:
+        return "lldb.eBasicTypeUnsignedLongLong"
+    if basic_type == lldb.eBasicTypeInt128:
+        return "lldb.eBasicTypeInt128"
+    if basic_type == lldb.eBasicTypeUnsignedInt128:
+        return "lldb.eBasicTypeUnsignedInt128"
+    if basic_type == lldb.eBasicTypeBool:
+        return "lldb.eBasicTypeBool"
+    if basic_type == lldb.eBasicTypeHalf:
+        return "lldb.eBasicTypeHalf"
+    if basic_type == lldb.eBasicTypeFloat:
+        return "lldb.eBasicTypeFloat"
+    if basic_type == lldb.eBasicTypeDouble:
+        return "lldb.eBasicTypeDouble"
+    if basic_type == lldb.eBasicTypeLongDouble:
+        return "lldb.eBasicTypeLongDouble"
+    if basic_type == lldb.eBasicTypeFloatComplex:
+        return "lldb.eBasicTypeFloatComplex"
+    if basic_type == lldb.eBasicTypeDoubleComplex:
+        return "lldb.eBasicTypeDoubleComplex"
+    if basic_type == lldb.eBasicTypeLongDoubleComplex:
+        return "lldb.eBasicTypeLongDoubleComplex"
+    if basic_type == lldb.eBasicTypeObjCID:
+        return "lldb.eBasicTypeObjCID"
+    if basic_type == lldb.eBasicTypeObjCClass:
+        return "lldb.eBasicTypeObjCClass"
+    if basic_type == lldb.eBasicTypeObjCSel:
+        return "lldb.eBasicTypeObjCSel"
+    if basic_type == lldb.eBasicTypeNullPtr:
+        return "lldb.eBasicTypeNullPtr"
+    if basic_type == lldb.eBasicTypeOther:
+        return "lldb.eBasicTypeOther"
+    return "unknown"
+
+def type_class_str(type_class):
+    if type_class == lldb.eTypeClassInvalid:
+        return "lldb.eTypeClassInvalid"
+    if type_class == lldb.eTypeClassArray:
+        return "lldb.eTypeClassArray"
+    if type_class == lldb.eTypeClassBlockPointer:
+        return "lldb.eTypeClassBlockPointer"
+    if type_class == lldb.eTypeClassBuiltin:
+        return "lldb.eTypeClassBuiltin"
+    if type_class == lldb.eTypeClassClass:
+        return "lldb.eTypeClassClass"
+    # if type_class == lldb.eTypeClassFloat: # Somehow not in the lldb module
+    #     return "lldb.eTypeClassFloat"
+    if type_class == lldb.eTypeClassComplexInteger:
+        return "lldb.eTypeClassComplexInteger"
+    if type_class == lldb.eTypeClassComplexFloat:
+        return "lldb.eTypeClassComplexFloat"
+    if type_class == lldb.eTypeClassFunction:
+        return "lldb.eTypeClassFunction"
+    if type_class == lldb.eTypeClassMemberPointer:
+        return "lldb.eTypeClassMemberPointer"
+    if type_class == lldb.eTypeClassObjCObject:
+        return "lldb.eTypeClassObjCObject"
+    if type_class == lldb.eTypeClassObjCInterface:
+        return "lldb.eTypeClassObjCInterface"
+    if type_class == lldb.eTypeClassObjCObjectPointer:
+        return "lldb.eTypeClassObjCObjectPointer"
+    if type_class == lldb.eTypeClassPointer:
+        return "lldb.eTypeClassPointer"
+    if type_class == lldb.eTypeClassReference:
+        return "lldb.eTypeClassReference"
+    if type_class == lldb.eTypeClassStruct:
+        return "lldb.eTypeClassStruct"
+    if type_class == lldb.eTypeClassTypedef:
+        return "lldb.eTypeClassTypedef"
+    if type_class == lldb.eTypeClassUnion:
+        return "lldb.eTypeClassUnion"
+    if type_class == lldb.eTypeClassVector:
+        return "lldb.eTypeClassVector"
+    if type_class == lldb.eTypeClassOther:
+        return "lldb.eTypeClassOther"
+    if type_class == lldb.eTypeClassAny:
+        return "lldb.eTypeClassAny"
+    return "unknown"
+
+def create_struct_class_from_sbvalue(sb_value: lldb.SBValue):
+    print("creating class.")
+    print(f"Basic type is {basic_type_str(sb_value.GetType().GetBasicType())}")
+    print(f"Type class is {type_class_str(sb_value.GetType().GetTypeClass())}")
+
+    # Ensure the sb_value is a struct
+    if sb_value.GetType().GetTypeClass() != lldb.eTypeClassStruct:
+        raise ValueError("SBValue is not a struct")
+
+    # Initialize the dynamic class with struct fields
+    def populate_attrs(class_namespace):
+        for i in range(sb_value.GetNumChildren()):
+            child = sb_value.GetChildAtIndex(i)
+            field_name = child.GetName()
+            field_value = child.GetValue()
+            class_namespace[field_name] = field_value
+
+    # Create a dynamic class
+    # TODO: avoid defining a class multiple times for one struct
+    class_name = sb_value.GetType().GetName()
+    struct_class = types.new_class(class_name, exec_body=populate_attrs)
+
+    # Create an instance of the dynamic class
+    instance = struct_class()
+    return instance
 
 
 class StructVar: ...
