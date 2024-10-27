@@ -6,6 +6,7 @@ EXE = "_build/test_exe"
 ARGS = "arg1 arg2".split(" ")
 
 
+# TODO: remove prints with asserts
 def test_int(_frame: lldb.SBFrame, *_):
     print("testing int")
     frame = Frame(_frame)
@@ -70,15 +71,22 @@ def test_pointer(_frame: lldb.SBFrame, *_):
     print("testing pointer")
     frame = Frame(_frame)
     there = frame.var("there")
-    print(f"Pointer is {there}")
+    print(f"Pointer as Var is {there}")
+    print(f"Pointer as VarInfo is {VarInfo(there)}")
     pointee = there.deref()
     assert pointee == 5
     not_a_pointer = frame.var("not_a_pointer")
     member_or_pointee = not_a_pointer.deref
-    print(VarInfo(member_or_pointee))
+    print(f"unfortunately named struct member is: {VarInfo(member_or_pointee)}")
     ptr_array = frame.var("array")
     for i, num in enumerate(ptr_array):
         assert num == ptr_array[i]
+    print(f"Length of ptr_array is {len(ptr_array)}")
+    string = frame.var("text")
+    print(f"String as Var is: {string}")
+    print(f"String as VarInfo is: {VarInfo(string)}")
+    print(f"Char: {frame.var('c')}")
+    print(f"Long string: {frame.var('long_text')}")
     return False
 
 

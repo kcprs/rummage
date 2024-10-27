@@ -160,27 +160,33 @@ class Type:
             return False
 
     def __init__(self, sb_type: lldb.SBType) -> None:
-        self.sb_type = sb_type
+        self._sb_type = sb_type
 
     @property
     def basic_type(self) -> Type.BasicType:
-        return Type.BasicType(self.sb_type.GetBasicType())
+        return Type.BasicType(self._sb_type.GetBasicType())
 
     @property
     def type_class(self) -> Type.TypeClass:
-        return Type.TypeClass(self.sb_type.GetTypeClass())
+        return Type.TypeClass(self._sb_type.GetTypeClass())
 
     @property
     def name(self) -> str:
-        return self.sb_type.GetName()
+        return self._sb_type.GetName()
 
     @property
     def is_pointer(self) -> bool:
-        return self.sb_type.IsPointerType()
+        return self._sb_type.IsPointerType()
+
+    @property
+    def pointee_type(self) -> Optional[Type]:
+        if not self.is_pointer:
+            return None
+        return Type(self._sb_type.GetPointeeType())
 
     @property
     def is_array(self) -> bool:
-        return self.sb_type.IsArrayType()
+        return self._sb_type.IsArrayType()
 
     @property
     def is_integral_signed(self) -> bool:
@@ -208,6 +214,21 @@ class Type:
     @property
     def is_boolean(self) -> bool:
         return self.basic_type == lldb.eBasicTypeBool
+
+    @property
+    def is_character(self) -> bool:
+        # Not sure about the weird ones, but they DO have 'char' in their names
+        return self.basic_type in [
+            lldb.eBasicTypeChar,
+            lldb.eBasicTypeSignedChar,
+            lldb.eBasicTypeUnsignedChar,
+            lldb.eBasicTypeWChar,
+            lldb.eBasicTypeSignedWChar,
+            lldb.eBasicTypeUnsignedWChar,
+            lldb.eBasicTypeChar16,
+            lldb.eBasicTypeChar32,
+            lldb.eBasicTypeChar8,
+        ]
 
     @property
     def is_numeric(self) -> bool:
@@ -242,6 +263,8 @@ class Var:
             self._value = float(sb_value.GetValue())
         elif var_type.is_boolean:
             self._value = bool(sb_value.GetValueAsUnsigned())
+        elif var_type.is_pointer:
+            self._value = int(sb_value.GetValueAsUnsigned())
         else:
             self._value = None
 
@@ -356,10 +379,45 @@ class Var:
         return self._value >= other
 
     def __str__(self) -> str:
-        return str(self._value or f"<{VarInfo(self).name}>")
+        var_info = VarInfo(self)
+        if self._value is not None:
+            type_ = var_info.type_
+
+            # Special char handling
+            if type_.is_character:
+                assert type(self._value) == int
+                return chr(self._value)
+
+            if type_.is_pointer:
+                assert type_.pointee_type is not None
+
+                # Special C string handling
+                if type_.pointee_type.is_character:
+                    max_chars = 20
+                    string, i, c = "", 0, "\0"
+
+                    for i in range(max_chars):
+                        c = str(self[i])
+                        if c == "\0":
+                            break
+                        string += c
+
+                    # Print ellipsis if reached max_chars and still not at end of string
+                    if i == max_chars - 1 and str(self[i + 1]) != "\0":
+                        string += "..."
+                    return string
+
+                # Special pointer handling
+                assert type(self._value) == int
+                return hex(self._value)
+
+            return str(self._value)
+
+        return f"<({var_info.type_}) {var_info.name}>"
 
     def __repr__(self):
-        return f"Var({self._value})"
+        var_info = VarInfo(self)
+        return f'({var_info.type_}) {var_info.name} {{ {self._value or "..."} }}'
 
 
 def deref(var: Var) -> Var:
@@ -390,7 +448,7 @@ class VarInfo:
         return self._sb_value.GetName()
 
     def __str__(self) -> str:
-        return str(self._sb_value)
+        return f"<{self._sb_value}>"
 
 
 class Frame:
@@ -441,16 +499,13 @@ class GlobalFileWriter:
         ), "Initialise using context manager: `with FileOutput():"
         return GlobalFileWriter._instance
 
-    def write(self, path: str, text, loc: Optional[Location] = None):
+    def write(self, path: str, text):
         file = self._files.get(path)
         if file is None:
             file = open(path, "w")
             self._files[path] = file
 
         assert not file.closed
-
-        if loc:
-            text = f"{loc} {text}"
 
         file.write(f"{text}\n")
 

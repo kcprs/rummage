@@ -55,6 +55,10 @@ void test_pointer() {
         array[i] = i + 1;
     }
 
+    const char c = 'c';
+    const char* text = "Lorem Ipsum";
+    const char* long_text = "Lorem ipsum dolor sit amet";
+
     (void)0;  // @loupe: test_pointer
     free(array);
 }
