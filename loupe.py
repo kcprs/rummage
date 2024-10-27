@@ -232,7 +232,6 @@ class Var:
         self._sb_value = sb_value
 
         var_type = Type(sb_value.GetType())
-
         if var_type.is_integral_signed:
             self._value = int(sb_value.GetValueAsSigned())
         elif var_type.is_integral_unsigned:
@@ -249,6 +248,27 @@ class Var:
         if child_sbvalue and child_sbvalue.IsValid():
             return Var(child_sbvalue)
         raise AttributeError(f"Attribute '{name}' is not defined")
+
+    def __getitem__(self, key):
+        if type(key) == int or (
+            type(key) == Var and VarMetadata(key).var_type.is_integral
+        ):
+            child_sb_value = self._sb_value.GetValueForExpressionPath(f"[{key}]")
+            if child_sb_value and child_sb_value.IsValid():
+                return Var(child_sb_value)
+            raise IndexError(f"Index {key} is out of range")
+
+        raise TypeError(
+            f"Cannot index into an instance of {type(self)}"
+            f"with an instance of {type(key)}"
+        )
+
+    def __iter__(self):
+        for i in range(len(self)):
+            yield Var(self._sb_value.GetChildAtIndex(i))
+
+    def __len__(self):
+        return self._sb_value.GetNumChildren()
 
     def __int__(self):
         return int(self._value)  # type: ignore - we should get a runtime error if this is not valid
@@ -332,7 +352,10 @@ class Var:
 class VarMetadata:
     def __init__(self, var: Var) -> None:
         self._sb_value = var._sb_value
-        # TODO: This should be an interface for var metadata, e.g. name etc.
+
+    @property
+    def var_type(self) -> Type:
+        return Type(self._sb_value.GetType())
 
 
 class Frame:

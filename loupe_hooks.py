@@ -6,52 +6,6 @@ EXE = "_build/test_exe"
 ARGS = "arg1 arg2".split(" ")
 
 
-# def break_main(frame: Frame):
-#     name = "im_a_float"
-#     var = frame.var(name)
-#     value = var.GetValue()
-#     print(f"Value of {name} is {value}")
-#     var_type = var.GetType()
-#     typeclass = var_type.GetTypeClass()
-#     print(f"Var {name} has type {var_type} and type class {typeclass}")
-#     print(f"For reference lldb.eTypeClassBuiltin has number {lldb.eTypeClassBuiltin}")
-#     print(f"For reference lldb.eTypeClassTypedef has number {lldb.eTypeClassTypedef}")
-#     GlobalFileWriter.instance().write("output.log", var, loc=frame.location)
-
-
-# def index_int_array(frame: Frame):
-#     array = frame.var("array")
-#     el_3 = array.GetChildAtIndex(3)
-#     assert el_3.IsValid()
-#
-#     GlobalFileWriter.instance().write("output.log", el_3, loc=frame.location)
-
-
-# def struct_children(frame: Frame):
-#     name = "some_struct"
-#     var = frame.var(name)
-#     var_type = var.GetType()
-#     typeclass = var_type.GetTypeClass()
-#     print(f"Var {name} has type {var_type} and type class {typeclass}")
-#     print(f"For reference lldb.eTypeClassBuiltin has number {lldb.eTypeClassBuiltin}")
-#     print(f"For reference lldb.eTypeClassTypedef has number {lldb.eTypeClassTypedef}")
-#     print(f"For reference ldb.eTypeClassStruct has number {lldb.eTypeClassStruct}")
-#
-#     child = var.GetChildMemberWithName("avg_blorp")
-#     assert child.IsValid()
-#
-#     GlobalFileWriter.instance().write("output.log", var, loc=frame.location)
-#     GlobalFileWriter.instance().write("output.log", child, loc=frame.location)
-
-
-# def deref_pointer(frame: Frame):
-#     pointer = frame.var("point")
-#     value = pointer.Dereference()
-#
-#     GlobalFileWriter.instance().write("output.log", pointer, loc=frame.location)
-#     GlobalFileWriter.instance().write("output.log", value, loc=frame.location)
-
-
 def test_int(_frame: lldb.SBFrame, *_):
     print("testing int")
     frame = Frame(_frame)
@@ -91,4 +45,25 @@ def test_struct(_frame: lldb.SBFrame, *_):
     a_struct = frame.var("a_struct")
     assert hasattr(a_struct, "a")
     assert hasattr(a_struct, "b")
-    print("Successully tested struct")
+    assert len(a_struct) == 2
+    field_names = ["a", "b"]
+    for field, name in zip(a_struct, field_names):
+        assert field == a_struct.__getattr__(name)
+    return False
+
+
+def test_array(_frame: lldb.SBFrame, *_):
+    print("testing array")
+    frame = Frame(_frame)
+    array = frame.var("multiplicity")
+    assert array[0] == 1
+    assert array[8] == 9
+    assert len(array) == 9
+    for i, num in enumerate(array):
+        assert num == array[i]
+    return False
+
+
+def tests_done(*_):
+    print("Tests passed")
+    return False
