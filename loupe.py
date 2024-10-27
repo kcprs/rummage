@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import os
 import re
-import types
-from typing import Iterable, Optional, Union
+from typing import Iterable, Optional
 
 import lldb
 
@@ -17,13 +16,14 @@ https://github.com/llvm/llvm-project/tree/main/lldb/examples/python
 https://gist.github.com/nkaretnikov/6ee00afabf73332c5a89eacb610369c2
 """
 
+
 class Type:
     class BasicType:
         def __init__(self, basic_type_enum: int) -> None:
-            self.basic_type_enum = basic_type_enum
+            self._basic_type_enum = basic_type_enum
 
         def __str__(self) -> str:
-            basic_type_enum = self.basic_type_enum
+            basic_type_enum = self._basic_type_enum
             if basic_type_enum == lldb.eBasicTypeInvalid:
                 return "lldb.eBasicTypeInvalid"
             if basic_type_enum == lldb.eBasicTypeVoid:
@@ -96,18 +96,17 @@ class Type:
 
         def __eq__(self, value: object, /) -> bool:
             if isinstance(value, Type.BasicType):
-                return self.basic_type_enum == self.basic_type_enum
+                return self._basic_type_enum == self._basic_type_enum
             if isinstance(value, int):
-                return self.basic_type_enum == value
+                return self._basic_type_enum == value
             return False
-            
 
     class TypeClass:
         def __init__(self, type_class_enum: int) -> None:
-            self.type_class_enum = type_class_enum
+            self._type_class_enum = type_class_enum
 
         def __str__(self) -> str:
-            type_class_enum = self.type_class_enum
+            type_class_enum = self._type_class_enum
             if type_class_enum == lldb.eTypeClassInvalid:
                 return "lldb.eTypeClassInvalid"
             if type_class_enum == lldb.eTypeClassArray:
@@ -154,11 +153,10 @@ class Type:
 
         def __eq__(self, value: object, /) -> bool:
             if isinstance(value, Type.TypeClass):
-                return self.type_class_enum == self.type_class_enum
+                return self._type_class_enum == self._type_class_enum
             if isinstance(value, int):
-                return self.type_class_enum == value
+                return self._type_class_enum == value
             return False
-            
 
     def __init__(self, sb_type: lldb.SBType) -> None:
         self.sb_type = sb_type
@@ -176,6 +174,48 @@ class Type:
         return self.sb_type.GetName()
 
     @property
+    def is_pointer(self) -> bool:
+        return self.sb_type.IsPointerType()
+
+    @property
+    def is_array(self) -> bool:
+        return self.sb_type.IsArrayType()
+
+    @property
+    def is_integral_signed(self) -> bool:
+        is_numeric, is_signed = lldb.is_numeric_type(self.basic_type._basic_type_enum)
+        return is_numeric and is_signed and not self.is_floating_point
+
+    @property
+    def is_integral_unsigned(self) -> bool:
+        is_numeric, is_signed = lldb.is_numeric_type(self.basic_type._basic_type_enum)
+        return is_numeric and not is_signed and not self.is_floating_point
+
+    @property
+    def is_integral(self) -> bool:
+        return self.is_integral_signed or self.is_integral_unsigned
+
+    @property
+    def is_floating_point(self) -> bool:
+        return self.basic_type in [
+            lldb.eBasicTypeHalf,
+            lldb.eBasicTypeFloat,
+            lldb.eBasicTypeDouble,
+            lldb.eBasicTypeLongDouble,
+        ]
+
+    @property
+    def is_boolean(self) -> bool:
+        return self.basic_type == lldb.eBasicTypeBool
+
+    @property
+    def is_numeric(self) -> bool:
+        # Come on, bools in Python are quite numeric!
+        return (
+            lldb.is_numeric_type(self.basic_type._basic_type_enum)[0] or self.is_boolean
+        )
+
+    @property
     def info_str(self) -> str:
         return (
             f"Type {self.name}\n"
@@ -186,72 +226,35 @@ class Type:
     def __str__(self) -> str:
         return self.name
 
-def create_struct_class_from_sbvalue(sb_value: lldb.SBValue):
-    print(Type(sb_value.GetType()).info_str)
 
-    # Ensure the sb_value is a struct
-    if sb_value.GetType().GetTypeClass() != lldb.eTypeClassStruct:
-        raise ValueError("SBValue is not a struct")
-
-    # Initialize the dynamic class with struct fields
-    def populate_attrs(class_namespace):
-        for i in range(sb_value.GetNumChildren()):
-            child = sb_value.GetChildAtIndex(i)
-            field_name = child.GetName()
-            field_value = child.GetValue()
-            class_namespace[field_name] = field_value
-
-    # Create a dynamic class
-    # TODO: avoid defining a class multiple times for one struct
-    class_name = sb_value.GetType().GetName()
-    struct_class = types.new_class(class_name, exec_body=populate_attrs)
-
-    # Create an instance of the dynamic class
-    instance = struct_class()
-    return instance
-
-
-class StructVar: ...
-
-
-class NumericVar:
+class Var:
     def __init__(self, sb_value: lldb.SBValue):
         self._sb_value = sb_value
-        self._value = self._extract_value(sb_value)
 
-    def _extract_value(self, sb_value):
-        value_type = sb_value.GetType()
+        var_type = Type(sb_value.GetType())
 
-        if value_type.IsPointerType() or value_type.IsArrayType():
-            raise TypeError(
-                "Pointer or array types are not supported in this wrapper class."
-            )
-
-        basic_type = value_type.GetBasicType()
-        if (
-            basic_type == lldb.eBasicTypeInt
-            or basic_type == lldb.eBasicTypeLong
-            or basic_type == lldb.eBasicTypeChar
-            or basic_type == lldb.eBasicTypeShort
-        ):
-            return sb_value.GetValueAsSigned()
-        elif (
-            basic_type == lldb.eBasicTypeUnsignedInt
-            or basic_type == lldb.eBasicTypeUnsignedLong
-            or basic_type == lldb.eBasicTypeUnsignedChar
-            or basic_type == lldb.eBasicTypeUnsignedShort
-        ):
-            return sb_value.GetValueAsUnsigned()
-        elif basic_type == lldb.eBasicTypeFloat or basic_type == lldb.eBasicTypeDouble:
-            return float(sb_value.GetValue())
+        if var_type.is_integral_signed:
+            self._value = int(sb_value.GetValueAsSigned())
+        elif var_type.is_integral_unsigned:
+            self._value = int(sb_value.GetValueAsUnsigned())
+        elif var_type.is_floating_point:
+            self._value = float(sb_value.GetValue())
+        elif var_type.is_boolean:
+            self._value = bool(sb_value.GetValueAsUnsigned())
         else:
-            raise TypeError("Unsupported SBValue type for numeric operations.")
+            self._value = None
+
+    def __getattr__(self, name):
+        child_sbvalue = self._sb_value.GetChildMemberWithName(name)
+        if child_sbvalue and child_sbvalue.IsValid():
+            return Var(child_sbvalue)
+        raise AttributeError(f"Attribute '{name}' is not defined")
 
     def __int__(self):
-        return int(self._value)
+        return int(self._value)  # type: ignore - we should get a runtime error if this is not valid
 
     def __float__(self):
-        return float(self._value)
+        return float(self._value)  # type: ignore - we should get a runtime error if this is not valid
 
     def __add__(self, other):
         return self._value + other
@@ -296,10 +299,10 @@ class NumericVar:
         return other**self._value
 
     def __neg__(self):
-        return -self._value
+        return -self._value  # type: ignore - we should get a runtime error if this is not valid
 
     def __abs__(self):
-        return abs(self._value)
+        return abs(self._value)  # type: ignore - we should get a runtime error if this is not valid
 
     def __eq__(self, other):
         return self._value == other
@@ -320,14 +323,14 @@ class NumericVar:
         return self._value >= other
 
     def __str__(self) -> str:
-        return str(self._sb_value)
+        return str(self._value)
 
     def __repr__(self):
         return f"NumericVar({self._value})"
 
 
 class VarMetadata:
-    def __init__(self, var: NumericVar) -> None:
+    def __init__(self, var: Var) -> None:
         self._sb_value = var._sb_value
         # TODO: This should be an interface for var metadata, e.g. name etc.
 
@@ -336,16 +339,11 @@ class Frame:
     def __init__(self, frame: lldb.SBFrame) -> None:
         self._inner = frame
 
-    def var(self, name) -> Union[lldb.SBValue, NumericVar]:
+    def var(self, name) -> Var:
         var = self._inner.FindVariable(name)
-        assert var.IsValid(), f"Variable '{name}' not found"
-
-        try:
-            var = NumericVar(var)
-        except TypeError:
-            pass
-
-        return var
+        if not var.IsValid():
+            raise KeyError(f"Variable '{name}' not found")
+        return Var(var)
 
     @property
     def location(self):

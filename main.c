@@ -18,6 +18,11 @@ void test_float() {
     (void)0;  // @loupe: test_float
 }
 
+void test_bool() {
+    bool truth = true;
+    bool lie = false;
+    (void)0;  // @loupe: test_bool
+}
 struct TestStruct {
     int a;
     float b;
@@ -31,6 +36,7 @@ void test_struct() {
 void run_tests() {
     test_int();
     test_float();
+    test_bool();
     test_struct();
 }
 
