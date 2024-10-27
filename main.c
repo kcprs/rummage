@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stdlib.h>
 
 typedef struct {
     int num_blorps;
@@ -39,12 +40,32 @@ void test_array() {
     (void)0;  // @loupe: test_array
 }
 
+struct NotAPointer {
+    bool deref;
+};
+
+void test_pointer() {
+    int here = 5;
+    int* there = &here;
+    struct NotAPointer not_a_pointer = {.deref = false};
+
+    const int len = 10;
+    int* array = malloc(len * sizeof(int));
+    for (int i = 0; i < len; ++i) {
+        array[i] = i + 1;
+    }
+
+    (void)0;  // @loupe: test_pointer
+    free(array);
+}
+
 void run_tests() {
     test_int();
     test_float();
     test_bool();
     test_struct();
     test_array();
+    test_pointer();
     (void)0;  // @loupe: tests_done
 }
 

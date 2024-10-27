@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import os
 import re
-from typing import Iterable, Optional
+import types
+from typing import Any, Iterable, Optional
 
 import lldb
 
@@ -229,6 +230,7 @@ class Type:
 
 class Var:
     def __init__(self, sb_value: lldb.SBValue):
+        # TODO: Careful, any member here might clash with underlying struct's members.
         self._sb_value = sb_value
 
         var_type = Type(sb_value.GetType())
@@ -243,25 +245,36 @@ class Var:
         else:
             self._value = None
 
-    def __getattr__(self, name):
+    def __getattr__(self, name) -> Any:
+        # Search underlying variable for members with the given name
         child_sbvalue = self._sb_value.GetChildMemberWithName(name)
         if child_sbvalue and child_sbvalue.IsValid():
             return Var(child_sbvalue)
+
+        # If there are no members called "deref", emulate a "deref" method for convenience.
+        if name == "deref":
+            return types.MethodType(deref, self)
+
         raise AttributeError(f"Attribute '{name}' is not defined")
 
     def __getitem__(self, key):
-        if type(key) == int or (
-            type(key) == Var and VarMetadata(key).var_type.is_integral
-        ):
-            child_sb_value = self._sb_value.GetValueForExpressionPath(f"[{key}]")
-            if child_sb_value and child_sb_value.IsValid():
-                return Var(child_sb_value)
-            raise IndexError(f"Index {key} is out of range")
+        if type(key) not in [int, Var]:
+            raise TypeError(
+                f"Cannot index into an instance of {type(self)}"
+                f"with an instance of {type(key)}"
+            )
 
-        raise TypeError(
-            f"Cannot index into an instance of {type(self)}"
-            f"with an instance of {type(key)}"
-        )
+        if type(key) == Var and not VarInfo(key).type_.is_integral:
+            raise TypeError(
+                f"Cannot index into an instance of {type(self)}"
+                f"with a variable of type {VarInfo(key).type_.name}"
+            )
+
+        child_sb_value = self._sb_value.GetValueForExpressionPath(f"[{key}]")
+        if child_sb_value and child_sb_value.IsValid():
+            return Var(child_sb_value)
+
+        raise IndexError(f"Index {key} is out of range")
 
     def __iter__(self):
         for i in range(len(self)):
@@ -343,19 +356,41 @@ class Var:
         return self._value >= other
 
     def __str__(self) -> str:
-        return str(self._value)
+        return str(self._value or f"<{VarInfo(self).name}>")
 
     def __repr__(self):
-        return f"NumericVar({self._value})"
+        return f"Var({self._value})"
 
 
-class VarMetadata:
+def deref(var: Var) -> Var:
+    type_ = Type(var._sb_value.GetType())
+    if not type_.is_pointer:
+        raise ValueError(f"Can't dereference a variable of type {type_.name}")
+
+    return Var(var._sb_value.Dereference())
+
+
+class VarInfo:
+    """
+    Class for accessing info about a variable.
+
+    Avoids adding attributes to the Var class which may clash with the members of the underlying
+    variable.
+    """
+
     def __init__(self, var: Var) -> None:
         self._sb_value = var._sb_value
 
     @property
-    def var_type(self) -> Type:
+    def type_(self) -> Type:
         return Type(self._sb_value.GetType())
+
+    @property
+    def name(self) -> str:
+        return self._sb_value.GetName()
+
+    def __str__(self) -> str:
+        return str(self._sb_value)
 
 
 class Frame:

@@ -1,6 +1,6 @@
 import lldb
 
-from loupe import Frame, GlobalFileWriter
+from loupe import Frame, GlobalFileWriter, VarInfo
 
 EXE = "_build/test_exe"
 ARGS = "arg1 arg2".split(" ")
@@ -49,6 +49,8 @@ def test_struct(_frame: lldb.SBFrame, *_):
     field_names = ["a", "b"]
     for field, name in zip(a_struct, field_names):
         assert field == a_struct.__getattr__(name)
+    print(f"Printing struct as Var: {a_struct}")
+    print(f"Printing struct as VarInfo: {VarInfo(a_struct)}")
     return False
 
 
@@ -61,6 +63,22 @@ def test_array(_frame: lldb.SBFrame, *_):
     assert len(array) == 9
     for i, num in enumerate(array):
         assert num == array[i]
+    return False
+
+
+def test_pointer(_frame: lldb.SBFrame, *_):
+    print("testing pointer")
+    frame = Frame(_frame)
+    there = frame.var("there")
+    print(f"Pointer is {there}")
+    pointee = there.deref()
+    assert pointee == 5
+    not_a_pointer = frame.var("not_a_pointer")
+    member_or_pointee = not_a_pointer.deref
+    print(VarInfo(member_or_pointee))
+    ptr_array = frame.var("array")
+    for i, num in enumerate(ptr_array):
+        assert num == ptr_array[i]
     return False
 
 
