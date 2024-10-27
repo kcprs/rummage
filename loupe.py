@@ -17,127 +17,177 @@ https://github.com/llvm/llvm-project/tree/main/lldb/examples/python
 https://gist.github.com/nkaretnikov/6ee00afabf73332c5a89eacb610369c2
 """
 
+class Type:
+    class BasicType:
+        def __init__(self, basic_type_enum: int) -> None:
+            self.basic_type_enum = basic_type_enum
 
-def basic_type_str(basic_type):
-    if basic_type == lldb.eBasicTypeInvalid:
-        return "lldb.eBasicTypeInvalid"
-    if basic_type == lldb.eBasicTypeVoid:
-        return "lldb.eBasicTypeVoid"
-    if basic_type == lldb.eBasicTypeChar:
-        return "lldb.eBasicTypeChar"
-    if basic_type == lldb.eBasicTypeSignedChar:
-        return "lldb.eBasicTypeSignedChar"
-    if basic_type == lldb.eBasicTypeUnsignedChar:
-        return "lldb.eBasicTypeUnsignedChar"
-    if basic_type == lldb.eBasicTypeWChar:
-        return "lldb.eBasicTypeWChar"
-    if basic_type == lldb.eBasicTypeSignedWChar:
-        return "lldb.eBasicTypeSignedWChar"
-    if basic_type == lldb.eBasicTypeUnsignedWChar:
-        return "lldb.eBasicTypeUnsignedWChar"
-    if basic_type == lldb.eBasicTypeChar16:
-        return "lldb.eBasicTypeChar16"
-    if basic_type == lldb.eBasicTypeChar32:
-        return "lldb.eBasicTypeChar32"
-    if basic_type == lldb.eBasicTypeChar8:
-        return "lldb.eBasicTypeChar8"
-    if basic_type == lldb.eBasicTypeShort:
-        return "lldb.eBasicTypeShort"
-    if basic_type == lldb.eBasicTypeUnsignedShort:
-        return "lldb.eBasicTypeUnsignedShort"
-    if basic_type == lldb.eBasicTypeInt:
-        return "lldb.eBasicTypeInt"
-    if basic_type == lldb.eBasicTypeUnsignedInt:
-        return "lldb.eBasicTypeUnsignedInt"
-    if basic_type == lldb.eBasicTypeLong:
-        return "lldb.eBasicTypeLong"
-    if basic_type == lldb.eBasicTypeUnsignedLong:
-        return "lldb.eBasicTypeUnsignedLong"
-    if basic_type == lldb.eBasicTypeLongLong:
-        return "lldb.eBasicTypeLongLong"
-    if basic_type == lldb.eBasicTypeUnsignedLongLong:
-        return "lldb.eBasicTypeUnsignedLongLong"
-    if basic_type == lldb.eBasicTypeInt128:
-        return "lldb.eBasicTypeInt128"
-    if basic_type == lldb.eBasicTypeUnsignedInt128:
-        return "lldb.eBasicTypeUnsignedInt128"
-    if basic_type == lldb.eBasicTypeBool:
-        return "lldb.eBasicTypeBool"
-    if basic_type == lldb.eBasicTypeHalf:
-        return "lldb.eBasicTypeHalf"
-    if basic_type == lldb.eBasicTypeFloat:
-        return "lldb.eBasicTypeFloat"
-    if basic_type == lldb.eBasicTypeDouble:
-        return "lldb.eBasicTypeDouble"
-    if basic_type == lldb.eBasicTypeLongDouble:
-        return "lldb.eBasicTypeLongDouble"
-    if basic_type == lldb.eBasicTypeFloatComplex:
-        return "lldb.eBasicTypeFloatComplex"
-    if basic_type == lldb.eBasicTypeDoubleComplex:
-        return "lldb.eBasicTypeDoubleComplex"
-    if basic_type == lldb.eBasicTypeLongDoubleComplex:
-        return "lldb.eBasicTypeLongDoubleComplex"
-    if basic_type == lldb.eBasicTypeObjCID:
-        return "lldb.eBasicTypeObjCID"
-    if basic_type == lldb.eBasicTypeObjCClass:
-        return "lldb.eBasicTypeObjCClass"
-    if basic_type == lldb.eBasicTypeObjCSel:
-        return "lldb.eBasicTypeObjCSel"
-    if basic_type == lldb.eBasicTypeNullPtr:
-        return "lldb.eBasicTypeNullPtr"
-    if basic_type == lldb.eBasicTypeOther:
-        return "lldb.eBasicTypeOther"
-    return "unknown"
+        def __str__(self) -> str:
+            basic_type_enum = self.basic_type_enum
+            if basic_type_enum == lldb.eBasicTypeInvalid:
+                return "lldb.eBasicTypeInvalid"
+            if basic_type_enum == lldb.eBasicTypeVoid:
+                return "lldb.eBasicTypeVoid"
+            if basic_type_enum == lldb.eBasicTypeChar:
+                return "lldb.eBasicTypeChar"
+            if basic_type_enum == lldb.eBasicTypeSignedChar:
+                return "lldb.eBasicTypeSignedChar"
+            if basic_type_enum == lldb.eBasicTypeUnsignedChar:
+                return "lldb.eBasicTypeUnsignedChar"
+            if basic_type_enum == lldb.eBasicTypeWChar:
+                return "lldb.eBasicTypeWChar"
+            if basic_type_enum == lldb.eBasicTypeSignedWChar:
+                return "lldb.eBasicTypeSignedWChar"
+            if basic_type_enum == lldb.eBasicTypeUnsignedWChar:
+                return "lldb.eBasicTypeUnsignedWChar"
+            if basic_type_enum == lldb.eBasicTypeChar16:
+                return "lldb.eBasicTypeChar16"
+            if basic_type_enum == lldb.eBasicTypeChar32:
+                return "lldb.eBasicTypeChar32"
+            if basic_type_enum == lldb.eBasicTypeChar8:
+                return "lldb.eBasicTypeChar8"
+            if basic_type_enum == lldb.eBasicTypeShort:
+                return "lldb.eBasicTypeShort"
+            if basic_type_enum == lldb.eBasicTypeUnsignedShort:
+                return "lldb.eBasicTypeUnsignedShort"
+            if basic_type_enum == lldb.eBasicTypeInt:
+                return "lldb.eBasicTypeInt"
+            if basic_type_enum == lldb.eBasicTypeUnsignedInt:
+                return "lldb.eBasicTypeUnsignedInt"
+            if basic_type_enum == lldb.eBasicTypeLong:
+                return "lldb.eBasicTypeLong"
+            if basic_type_enum == lldb.eBasicTypeUnsignedLong:
+                return "lldb.eBasicTypeUnsignedLong"
+            if basic_type_enum == lldb.eBasicTypeLongLong:
+                return "lldb.eBasicTypeLongLong"
+            if basic_type_enum == lldb.eBasicTypeUnsignedLongLong:
+                return "lldb.eBasicTypeUnsignedLongLong"
+            if basic_type_enum == lldb.eBasicTypeInt128:
+                return "lldb.eBasicTypeInt128"
+            if basic_type_enum == lldb.eBasicTypeUnsignedInt128:
+                return "lldb.eBasicTypeUnsignedInt128"
+            if basic_type_enum == lldb.eBasicTypeBool:
+                return "lldb.eBasicTypeBool"
+            if basic_type_enum == lldb.eBasicTypeHalf:
+                return "lldb.eBasicTypeHalf"
+            if basic_type_enum == lldb.eBasicTypeFloat:
+                return "lldb.eBasicTypeFloat"
+            if basic_type_enum == lldb.eBasicTypeDouble:
+                return "lldb.eBasicTypeDouble"
+            if basic_type_enum == lldb.eBasicTypeLongDouble:
+                return "lldb.eBasicTypeLongDouble"
+            if basic_type_enum == lldb.eBasicTypeFloatComplex:
+                return "lldb.eBasicTypeFloatComplex"
+            if basic_type_enum == lldb.eBasicTypeDoubleComplex:
+                return "lldb.eBasicTypeDoubleComplex"
+            if basic_type_enum == lldb.eBasicTypeLongDoubleComplex:
+                return "lldb.eBasicTypeLongDoubleComplex"
+            if basic_type_enum == lldb.eBasicTypeObjCID:
+                return "lldb.eBasicTypeObjCID"
+            if basic_type_enum == lldb.eBasicTypeObjCClass:
+                return "lldb.eBasicTypeObjCClass"
+            if basic_type_enum == lldb.eBasicTypeObjCSel:
+                return "lldb.eBasicTypeObjCSel"
+            if basic_type_enum == lldb.eBasicTypeNullPtr:
+                return "lldb.eBasicTypeNullPtr"
+            if basic_type_enum == lldb.eBasicTypeOther:
+                return "lldb.eBasicTypeOther"
+            return "unknown"
 
-def type_class_str(type_class):
-    if type_class == lldb.eTypeClassInvalid:
-        return "lldb.eTypeClassInvalid"
-    if type_class == lldb.eTypeClassArray:
-        return "lldb.eTypeClassArray"
-    if type_class == lldb.eTypeClassBlockPointer:
-        return "lldb.eTypeClassBlockPointer"
-    if type_class == lldb.eTypeClassBuiltin:
-        return "lldb.eTypeClassBuiltin"
-    if type_class == lldb.eTypeClassClass:
-        return "lldb.eTypeClassClass"
-    # if type_class == lldb.eTypeClassFloat: # Somehow not in the lldb module
-    #     return "lldb.eTypeClassFloat"
-    if type_class == lldb.eTypeClassComplexInteger:
-        return "lldb.eTypeClassComplexInteger"
-    if type_class == lldb.eTypeClassComplexFloat:
-        return "lldb.eTypeClassComplexFloat"
-    if type_class == lldb.eTypeClassFunction:
-        return "lldb.eTypeClassFunction"
-    if type_class == lldb.eTypeClassMemberPointer:
-        return "lldb.eTypeClassMemberPointer"
-    if type_class == lldb.eTypeClassObjCObject:
-        return "lldb.eTypeClassObjCObject"
-    if type_class == lldb.eTypeClassObjCInterface:
-        return "lldb.eTypeClassObjCInterface"
-    if type_class == lldb.eTypeClassObjCObjectPointer:
-        return "lldb.eTypeClassObjCObjectPointer"
-    if type_class == lldb.eTypeClassPointer:
-        return "lldb.eTypeClassPointer"
-    if type_class == lldb.eTypeClassReference:
-        return "lldb.eTypeClassReference"
-    if type_class == lldb.eTypeClassStruct:
-        return "lldb.eTypeClassStruct"
-    if type_class == lldb.eTypeClassTypedef:
-        return "lldb.eTypeClassTypedef"
-    if type_class == lldb.eTypeClassUnion:
-        return "lldb.eTypeClassUnion"
-    if type_class == lldb.eTypeClassVector:
-        return "lldb.eTypeClassVector"
-    if type_class == lldb.eTypeClassOther:
-        return "lldb.eTypeClassOther"
-    if type_class == lldb.eTypeClassAny:
-        return "lldb.eTypeClassAny"
-    return "unknown"
+        def __eq__(self, value: object, /) -> bool:
+            if isinstance(value, Type.BasicType):
+                return self.basic_type_enum == self.basic_type_enum
+            if isinstance(value, int):
+                return self.basic_type_enum == value
+            return False
+            
+
+    class TypeClass:
+        def __init__(self, type_class_enum: int) -> None:
+            self.type_class_enum = type_class_enum
+
+        def __str__(self) -> str:
+            type_class_enum = self.type_class_enum
+            if type_class_enum == lldb.eTypeClassInvalid:
+                return "lldb.eTypeClassInvalid"
+            if type_class_enum == lldb.eTypeClassArray:
+                return "lldb.eTypeClassArray"
+            if type_class_enum == lldb.eTypeClassBlockPointer:
+                return "lldb.eTypeClassBlockPointer"
+            if type_class_enum == lldb.eTypeClassBuiltin:
+                return "lldb.eTypeClassBuiltin"
+            if type_class_enum == lldb.eTypeClassClass:
+                return "lldb.eTypeClassClass"
+            # if type_class == lldb.eTypeClassFloat: # Somehow not in the lldb module
+            #     return "lldb.eTypeClassFloat"
+            if type_class_enum == lldb.eTypeClassComplexInteger:
+                return "lldb.eTypeClassComplexInteger"
+            if type_class_enum == lldb.eTypeClassComplexFloat:
+                return "lldb.eTypeClassComplexFloat"
+            if type_class_enum == lldb.eTypeClassFunction:
+                return "lldb.eTypeClassFunction"
+            if type_class_enum == lldb.eTypeClassMemberPointer:
+                return "lldb.eTypeClassMemberPointer"
+            if type_class_enum == lldb.eTypeClassObjCObject:
+                return "lldb.eTypeClassObjCObject"
+            if type_class_enum == lldb.eTypeClassObjCInterface:
+                return "lldb.eTypeClassObjCInterface"
+            if type_class_enum == lldb.eTypeClassObjCObjectPointer:
+                return "lldb.eTypeClassObjCObjectPointer"
+            if type_class_enum == lldb.eTypeClassPointer:
+                return "lldb.eTypeClassPointer"
+            if type_class_enum == lldb.eTypeClassReference:
+                return "lldb.eTypeClassReference"
+            if type_class_enum == lldb.eTypeClassStruct:
+                return "lldb.eTypeClassStruct"
+            if type_class_enum == lldb.eTypeClassTypedef:
+                return "lldb.eTypeClassTypedef"
+            if type_class_enum == lldb.eTypeClassUnion:
+                return "lldb.eTypeClassUnion"
+            if type_class_enum == lldb.eTypeClassVector:
+                return "lldb.eTypeClassVector"
+            if type_class_enum == lldb.eTypeClassOther:
+                return "lldb.eTypeClassOther"
+            if type_class_enum == lldb.eTypeClassAny:
+                return "lldb.eTypeClassAny"
+            return "unknown"
+
+        def __eq__(self, value: object, /) -> bool:
+            if isinstance(value, Type.TypeClass):
+                return self.type_class_enum == self.type_class_enum
+            if isinstance(value, int):
+                return self.type_class_enum == value
+            return False
+            
+
+    def __init__(self, sb_type: lldb.SBType) -> None:
+        self.sb_type = sb_type
+
+    @property
+    def basic_type(self) -> Type.BasicType:
+        return Type.BasicType(self.sb_type.GetBasicType())
+
+    @property
+    def type_class(self) -> Type.TypeClass:
+        return Type.TypeClass(self.sb_type.GetTypeClass())
+
+    @property
+    def name(self) -> str:
+        return self.sb_type.GetName()
+
+    @property
+    def info_str(self) -> str:
+        return (
+            f"Type {self.name}\n"
+            f"  BasicType: {self.basic_type}\n"
+            f"  TypeClass: {self.type_class}\n"
+        )
+
+    def __str__(self) -> str:
+        return self.name
 
 def create_struct_class_from_sbvalue(sb_value: lldb.SBValue):
-    print("creating class.")
-    print(f"Basic type is {basic_type_str(sb_value.GetType().GetBasicType())}")
-    print(f"Type class is {type_class_str(sb_value.GetType().GetTypeClass())}")
+    print(Type(sb_value.GetType()).info_str)
 
     # Ensure the sb_value is a struct
     if sb_value.GetType().GetTypeClass() != lldb.eTypeClassStruct:
