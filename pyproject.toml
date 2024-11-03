@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "rummage"
+version = "0.1.0"
+description = ""
+authors = ["Kacper Sagnowski <ksagnowski@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.10.0"
+isort = "^5.13.2"
+pyright = "^1.1.387"
+debugpy = "^1.8.7"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

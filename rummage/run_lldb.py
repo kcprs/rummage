@@ -3,10 +3,11 @@ import logging as _logging
 import os as _os
 import sys as _sys
 
-import rummage as _rummage
 import rummage_hooks as _rummage_hooks
 
-_logging.basicConfig(level=_logging.DEBUG)
+import rummage as _rummage
+
+# _logging.basicConfig(level=_logging.DEBUG)
 
 _this_module = _sys.modules[__name__]
 _hook_funcs = [

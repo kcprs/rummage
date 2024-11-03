@@ -8,15 +8,17 @@ from typing import Any, Iterable, Optional
 
 import lldb
 
-"""
-NOTES
-
-Good references:
-
-https://lldb.llvm.org/use/python-reference.html
-https://github.com/llvm/llvm-project/tree/main/lldb/examples/python
-https://gist.github.com/nkaretnikov/6ee00afabf73332c5a89eacb610369c2
-"""
+__all__ = [
+    "Location",
+    "StackFrame",
+    "Var",
+    "VarInfo",
+    # TODO: Below are actually lib internals, could be moves somwhere else
+    "Breakpoint",
+    "Debugger",
+    "GlobalFileWriter",
+    "Target",
+]
 
 
 class Type:
