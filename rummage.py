@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import logging
 import os
 import re
 import types
 from typing import Any, Iterable, Optional
-import logging
 
 import lldb
 
@@ -421,7 +421,9 @@ class Var:
 
     def __repr__(self):
         var_info = VarInfo(self)
-        return f'({var_info.canonical_type}) {var_info.name} {{ {self._value or "..."} }}'
+        return (
+            f'({var_info.canonical_type}) {var_info.name} {{ {self._value or "..."} }}'
+        )
 
 
 def deref(var: Var) -> Var:
@@ -575,7 +577,9 @@ class Breakpoint:
                         logging.info(f"Breakpoint set at {path}:{line_number}")
                         this._breakpoints.append(breakpoint)
                     else:
-                        logging.warning(f"Failed to set breakpoint at {path}:{line_number}")
+                        logging.warning(
+                            f"Failed to set breakpoint at {path}:{line_number}"
+                        )
 
         for comp_unit in target.compile_units:
             file_spec = comp_unit.GetFileSpec()

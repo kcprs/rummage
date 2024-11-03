@@ -2,12 +2,12 @@ from __future__ import annotations
 
 # TODO: import with leading underscores to avoid potential clashes with hook wrappers
 import inspect
+import logging
 import os
 import sys
-import logging
 
 import rummage_hooks
-from rummage import Breakpoint, StackFrame, GlobalFileWriter, Target
+from rummage import Breakpoint, GlobalFileWriter, StackFrame, Target
 
 # logging.basicConfig(level=logging.DEBUG)
 
@@ -17,6 +17,7 @@ _hook_funcs = [
     for (name, obj) in inspect.getmembers(rummage_hooks, inspect.isfunction)
     if not name.startswith("_")
 ]
+
 
 def _create_hook_wrappers():
     """

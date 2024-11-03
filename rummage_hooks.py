@@ -1,5 +1,6 @@
 import logging
-from rummage import StackFrame, GlobalFileWriter, VarInfo
+
+from rummage import GlobalFileWriter, StackFrame, VarInfo
 
 EXE = "_build/test_exe"
 ARGS = "arg1 arg2".split(" ")
@@ -70,8 +71,8 @@ def test_pointer(frame: StackFrame):
     assert len(ptr_array) == 1
     string = frame.var("text")
     assert str(string) == "Lorem Ipsum"
-    assert str(frame.var('c')) == "c"
-    assert str(frame.var('long_text')) == "Lorem ipsum dolor si..."
+    assert str(frame.var("c")) == "c"
+    assert str(frame.var("long_text")) == "Lorem ipsum dolor si..."
 
 
 def tests_done(*_):
