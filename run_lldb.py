@@ -4,17 +4,15 @@ import inspect
 import os
 import sys
 
-import __main__ as this_module
-
 import rummage_hooks
 from rummage import Breakpoint, Frame, GlobalFileWriter, Target
 
+_this_module = sys.modules[__name__]
 _hook_funcs = [
     obj
     for (name, obj) in inspect.getmembers(rummage_hooks, inspect.isfunction)
     if not name.startswith("_")
 ]
-
 
 def _create_hook_wrappers():
     """
@@ -46,24 +44,21 @@ def _create_hook_wrappers():
 
             return hook_wrapper
 
-        setattr(this_module, hook_func.__name__, make_hook_wrapper())
+        setattr(_this_module, hook_func.__name__, make_hook_wrapper())
 
-    print("Module has functions")
-    print(inspect.getmembers(this_module, inspect.isfunction))
+    print("Module has:")
+    print(dir(_this_module))
 
 
 # This must be done at module import time so that the wrappers are visible to lldb when the
 # module is imported.
-# TODO: This is not working. For now stick to passing hooks directly to lldb with the ugly
-# function signature.
-# TODO: Look at functools.wraps
-# _create_hook_wrappers()
+_create_hook_wrappers()
 
 
 def _set_breakpoints(target: Target):
     for hook_func in _hook_funcs:
         b = Breakpoint.from_regex(target, r"@rummage\s*:\s*" + hook_func.__name__)
-        b.set_callback_via_path(f"{hook_func.__module__}.{hook_func.__name__}")
+        b.set_callback_via_path(f"{__name__}.{hook_func.__name__}")
 
 
 def _main(debugger):

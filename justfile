@@ -21,6 +21,5 @@ build:
 lldb: build check
     lldb \
     -O 'command script import rummage.py' \
-    -O 'command script import rummage_hooks.py' \
     -O 'command script import run_lldb.py' \
     -b \
