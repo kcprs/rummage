@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+# TODO: import with leading underscores to avoid potential clashes with hook wrappers
 import inspect
 import os
 import sys
+import logging
 
 import rummage_hooks
 from rummage import Breakpoint, StackFrame, GlobalFileWriter, Target
+
+# logging.basicConfig(level=logging.DEBUG)
 
 _this_module = sys.modules[__name__]
 _hook_funcs = [
@@ -29,7 +33,7 @@ def _create_hook_wrappers():
     """
 
     for hook_func in _hook_funcs:
-        print(f"Creating wrapper for hook {hook_func.__name__}")
+        logging.debug(f"Creating wrapper for hook {hook_func.__name__}")
 
         # Must wrap wrapper creation in a function with default arg value, so that the wrapper refers
         # to the current `hook_func`. Otherwise all wrappers would refer to the last `hook_func` in
@@ -37,7 +41,7 @@ def _create_hook_wrappers():
         def make_hook_wrapper(func=hook_func):
             # We ignore args other than `frame`
             def hook_wrapper(frame, *_):
-                print(f"Executing hook wrapper for hook {func.__name__}")
+                logging.debug(f"Executing hook wrapper for hook {func.__name__}")
                 # Returning False tells lldb not to stop at the breakpoint.
                 # Hook functions may return a truthy value to request stopping at the breakpoint.
                 return bool(func(StackFrame(frame)))
@@ -46,8 +50,7 @@ def _create_hook_wrappers():
 
         setattr(_this_module, hook_func.__name__, make_hook_wrapper())
 
-    print("Module has:")
-    print(dir(_this_module))
+    logging.debug(f"Module has: {dir(_this_module)}")
 
 
 # This must be done at module import time so that the wrappers are visible to lldb when the

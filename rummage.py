@@ -4,6 +4,7 @@ import os
 import re
 import types
 from typing import Any, Iterable, Optional
+import logging
 
 import lldb
 
@@ -555,7 +556,7 @@ class Breakpoint:
 
     @staticmethod
     def from_regex(target, regex_str) -> Breakpoint:
-        print(f"Setting breakpoints at locations that match '{regex_str}'...")
+        logging.info(f"Setting breakpoints at locations that match '{regex_str}'...")
 
         this = Breakpoint(target)
         regex_str = re.compile(regex_str)
@@ -571,10 +572,10 @@ class Breakpoint:
                     )
 
                     if breakpoint.IsValid():
-                        print(f"Breakpoint set at {path}:{line_number}")
+                        logging.info(f"Breakpoint set at {path}:{line_number}")
                         this._breakpoints.append(breakpoint)
                     else:
-                        print(f"Failed to set breakpoint at {path}:{line_number}")
+                        logging.warning(f"Failed to set breakpoint at {path}:{line_number}")
 
         for comp_unit in target.compile_units:
             file_spec = comp_unit.GetFileSpec()
@@ -584,11 +585,11 @@ class Breakpoint:
                 set_in_file(source_file_path)
 
         if len(this._breakpoints) == 0:
-            print("No matches found.")
+            logging.info("No matches found.")
 
         return this
 
     def set_callback_via_path(self, cb_name: str):
-        print(f"Breakpoint: adding callback {cb_name}")
+        logging.debug(f"Breakpoint: adding callback {cb_name}")
         for b in self._breakpoints:
             b.SetScriptCallbackFunction(cb_name)
