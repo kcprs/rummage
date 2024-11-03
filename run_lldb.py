@@ -5,7 +5,7 @@ import os
 import sys
 
 import rummage_hooks
-from rummage import Breakpoint, Frame, GlobalFileWriter, Target
+from rummage import Breakpoint, StackFrame, GlobalFileWriter, Target
 
 _this_module = sys.modules[__name__]
 _hook_funcs = [
@@ -40,7 +40,7 @@ def _create_hook_wrappers():
                 print(f"Executing hook wrapper for hook {func.__name__}")
                 # Returning False tells lldb not to stop at the breakpoint.
                 # Hook functions may return a truthy value to request stopping at the breakpoint.
-                return bool(func(Frame(frame)))
+                return bool(func(StackFrame(frame)))
 
             return hook_wrapper
 

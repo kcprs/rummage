@@ -454,7 +454,7 @@ class VarInfo:
         return f"<{self._sb_value}>"
 
 
-class Frame:
+class StackFrame:
     def __init__(self, frame: lldb.SBFrame) -> None:
         self._inner = frame
 

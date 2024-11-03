@@ -1,11 +1,11 @@
-from rummage import Frame, GlobalFileWriter, VarInfo
+from rummage import StackFrame, GlobalFileWriter, VarInfo
 
 EXE = "_build/test_exe"
 ARGS = "arg1 arg2".split(" ")
 
 
 # TODO: remove prints with asserts
-def test_int(frame: Frame):
+def test_int(frame: StackFrame):
     print("testing int")
     one = frame.var("one")
     assert one > 0
@@ -13,7 +13,7 @@ def test_int(frame: Frame):
     assert one + 2 == 3
 
 
-def test_float(frame: Frame):
+def test_float(frame: StackFrame):
     print("testing float")
     half = frame.var("half")
     print(f"Type of half is {type(half)}")
@@ -23,7 +23,7 @@ def test_float(frame: Frame):
     assert half > 0
 
 
-def test_bool(frame: Frame):
+def test_bool(frame: StackFrame):
     print("testing bool")
     truth = frame.var("truth")
     lie = frame.var("lie")
@@ -31,7 +31,7 @@ def test_bool(frame: Frame):
     assert not lie == 1
 
 
-def test_struct(frame: Frame):
+def test_struct(frame: StackFrame):
     print("testing struct")
     a_struct = frame.var("a_struct")
     assert hasattr(a_struct, "a")
@@ -44,7 +44,7 @@ def test_struct(frame: Frame):
     print(f"Printing struct as VarInfo: {VarInfo(a_struct)}")
 
 
-def test_array(frame: Frame):
+def test_array(frame: StackFrame):
     print("testing array")
     array = frame.var("multiplicity")
     assert array[0] == 1
@@ -54,7 +54,7 @@ def test_array(frame: Frame):
         assert num == array[i]
 
 
-def test_pointer(frame: Frame):
+def test_pointer(frame: StackFrame):
     print("testing pointer")
     there = frame.var("there")
     print(f"Pointer as Var is {there}")
