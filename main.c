@@ -11,18 +11,18 @@ typedef int ImAnInt;
 
 void test_int() {
     int one = 1;
-    (void)0;  // @loupe: test_int
+    (void)0;  // @rummage: test_int
 }
 
 void test_float() {
     float half = 0.5f;
-    (void)0;  // @loupe: test_float
+    (void)0;  // @rummage: test_float
 }
 
 void test_bool() {
     bool truth = true;
     bool lie = false;
-    (void)0;  // @loupe: test_bool
+    (void)0;  // @rummage: test_bool
 }
 
 struct TestStruct {
@@ -32,12 +32,12 @@ struct TestStruct {
 
 void test_struct() {
     struct TestStruct a_struct = {.a = 1, .b = 3.67f};
-    (void)0;  // @loupe: test_struct
+    (void)0;  // @rummage: test_struct
 }
 
 void test_array() {
     int multiplicity[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-    (void)0;  // @loupe: test_array
+    (void)0;  // @rummage: test_array
 }
 
 struct NotAPointer {
@@ -59,7 +59,7 @@ void test_pointer() {
     const char* text = "Lorem Ipsum";
     const char* long_text = "Lorem ipsum dolor sit amet";
 
-    (void)0;  // @loupe: test_pointer
+    (void)0;  // @rummage: test_pointer
     free(array);
 }
 
@@ -70,7 +70,7 @@ void run_tests() {
     test_struct();
     test_array();
     test_pointer();
-    (void)0;  // @loupe: tests_done
+    (void)0;  // @rummage: tests_done
 }
 
 int main(int argc, char** argv) {

@@ -254,7 +254,7 @@ class Var:
         # TODO: Careful, any member here might clash with underlying struct's members.
         self._sb_value = sb_value
 
-        var_type = Type(sb_value.GetType())
+        var_type = VarInfo(self).canonical_type
         if var_type.is_integral_signed:
             self._value = int(sb_value.GetValueAsSigned())
         elif var_type.is_integral_unsigned:
@@ -287,10 +287,10 @@ class Var:
                 f"with an instance of {type(key)}"
             )
 
-        if type(key) == Var and not VarInfo(key).type_.is_integral:
+        if type(key) == Var and not VarInfo(key).canonical_type.is_integral:
             raise TypeError(
                 f"Cannot index into an instance of {type(self)}"
-                f"with a variable of type {VarInfo(key).type_.name}"
+                f"with a variable of type {VarInfo(key).canonical_type.name}"
             )
 
         child_sb_value = self._sb_value.GetValueForExpressionPath(f"[{key}]")
@@ -307,6 +307,9 @@ class Var:
         return self._sb_value.GetNumChildren()
 
     def __int__(self):
+        return int(self._value)  # type: ignore - we should get a runtime error if this is not valid
+
+    def __index__(self):
         return int(self._value)  # type: ignore - we should get a runtime error if this is not valid
 
     def __float__(self):
@@ -381,7 +384,7 @@ class Var:
     def __str__(self) -> str:
         var_info = VarInfo(self)
         if self._value is not None:
-            type_ = var_info.type_
+            type_ = var_info.canonical_type
 
             # Special char handling
             if type_.is_character:
@@ -413,15 +416,15 @@ class Var:
 
             return str(self._value)
 
-        return f"<({var_info.type_}) {var_info.name}>"
+        return f"<({var_info.canonical_type}) {var_info.name}>"
 
     def __repr__(self):
         var_info = VarInfo(self)
-        return f'({var_info.type_}) {var_info.name} {{ {self._value or "..."} }}'
+        return f'({var_info.canonical_type}) {var_info.name} {{ {self._value or "..."} }}'
 
 
 def deref(var: Var) -> Var:
-    type_ = Type(var._sb_value.GetType())
+    type_ = VarInfo(var).canonical_type
     if not type_.is_pointer:
         raise ValueError(f"Can't dereference a variable of type {type_.name}")
 
@@ -440,8 +443,8 @@ class VarInfo:
         self._sb_value = var._sb_value
 
     @property
-    def type_(self) -> Type:
-        return Type(self._sb_value.GetType())
+    def canonical_type(self) -> Type:
+        return Type(self._sb_value.GetType().GetCanonicalType())
 
     @property
     def name(self) -> str:

@@ -1,6 +1,6 @@
 import lldb
 
-from loupe import Frame, GlobalFileWriter, VarInfo
+from rummage import Frame, GlobalFileWriter, VarInfo
 
 EXE = "_build/test_exe"
 ARGS = "arg1 arg2".split(" ")

@@ -6,12 +6,12 @@ import sys
 
 import __main__ as this_module
 
-import loupe_hooks
-from loupe import Breakpoint, Frame, GlobalFileWriter, Target
+import rummage_hooks
+from rummage import Breakpoint, Frame, GlobalFileWriter, Target
 
 _hook_funcs = [
     obj
-    for (name, obj) in inspect.getmembers(loupe_hooks, inspect.isfunction)
+    for (name, obj) in inspect.getmembers(rummage_hooks, inspect.isfunction)
     if not name.startswith("_")
 ]
 
@@ -56,19 +56,20 @@ def _create_hook_wrappers():
 # module is imported.
 # TODO: This is not working. For now stick to passing hooks directly to lldb with the ugly
 # function signature.
+# TODO: Look at functools.wraps
 # _create_hook_wrappers()
 
 
 def _set_breakpoints(target: Target):
     for hook_func in _hook_funcs:
-        b = Breakpoint.from_regex(target, r"@loupe\s*:\s*" + hook_func.__name__)
+        b = Breakpoint.from_regex(target, r"@rummage\s*:\s*" + hook_func.__name__)
         b.set_callback_via_path(f"{hook_func.__module__}.{hook_func.__name__}")
 
 
 def _main(debugger):
     debugger.SetAsync(False)
 
-    target = debugger.CreateTarget(loupe_hooks.EXE)
+    target = debugger.CreateTarget(rummage_hooks.EXE)
 
     _set_breakpoints(Target(target))
 
@@ -77,7 +78,7 @@ def _main(debugger):
         # TODO: This blocks only until the debugger stops at a breakpoint.
         # This is not a problem if we set ALL breakpoints to auto-continue.
         # Otherwise, we have to switch to async mode and periodically check process status.
-        target.LaunchSimple(loupe_hooks.ARGS, None, ".")
+        target.LaunchSimple(rummage_hooks.ARGS, None, ".")
 
 
 def __lldb_init_module(debugger, *_):
