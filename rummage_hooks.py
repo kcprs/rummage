@@ -5,23 +5,22 @@ EXE = "_build/test_exe"
 ARGS = "arg1 arg2".split(" ")
 
 
-# TODO: remove prints with asserts
 def test_int(frame: StackFrame):
     logging.debug("testing int")
     one = frame.var("one")
     assert one > 0
     assert one == 1
     assert one + 2 == 3
+    assert str(VarInfo(one)) == "<(int) one = 1>"
 
 
 def test_float(frame: StackFrame):
     logging.debug("testing float")
     half = frame.var("half")
-    print(f"Type of half is {type(half)}")
-    print(f"Half is {half}")
     assert half == 0.5
     assert half + half == 1
     assert half > 0
+    assert str(half) == str(0.5)
 
 
 def test_bool(frame: StackFrame):
@@ -30,6 +29,8 @@ def test_bool(frame: StackFrame):
     lie = frame.var("lie")
     assert truth == 1
     assert not lie == 1
+    assert str(truth) == str(True)
+    assert str(lie) == str(False)
 
 
 def test_struct(frame: StackFrame):
@@ -41,8 +42,8 @@ def test_struct(frame: StackFrame):
     field_names = ["a", "b"]
     for field, name in zip(a_struct, field_names):
         assert field == a_struct.__getattr__(name)
-    print(f"Printing struct as Var: {a_struct}")
-    print(f"Printing struct as VarInfo: {VarInfo(a_struct)}")
+    assert str(a_struct) == "<(TestStruct) a_struct>"
+    assert str(VarInfo(a_struct)) == "<(TestStruct) a_struct = (a = 1, b = 3.5)>"
 
 
 def test_array(frame: StackFrame):
@@ -58,22 +59,19 @@ def test_array(frame: StackFrame):
 def test_pointer(frame: StackFrame):
     logging.debug("testing pointer")
     there = frame.var("there")
-    print(f"Pointer as Var is {there}")
-    print(f"Pointer as VarInfo is {VarInfo(there)}")
     pointee = there.deref()
     assert pointee == 5
     not_a_pointer = frame.var("not_a_pointer")
-    member_or_pointee = not_a_pointer.deref
-    print(f"unfortunately named struct member is: {VarInfo(member_or_pointee)}")
+    member_not_pointee = not_a_pointer.deref
+    assert member_not_pointee == 15
     ptr_array = frame.var("array")
     for i, num in enumerate(ptr_array):
         assert num == ptr_array[i]
-    print(f"Length of ptr_array is {len(ptr_array)}")
+    assert len(ptr_array) == 1
     string = frame.var("text")
-    print(f"String as Var is: {string}")
-    print(f"String as VarInfo is: {VarInfo(string)}")
-    print(f"Char: {frame.var('c')}")
-    print(f"Long string: {frame.var('long_text')}")
+    assert str(string) == "Lorem Ipsum"
+    assert str(frame.var('c')) == "c"
+    assert str(frame.var('long_text')) == "Lorem ipsum dolor si..."
 
 
 def tests_done(*_):

@@ -31,7 +31,7 @@ struct TestStruct {
 };
 
 void test_struct() {
-    struct TestStruct a_struct = {.a = 1, .b = 3.67f};
+    struct TestStruct a_struct = {.a = 1, .b = 3.5f};
     (void)0;  // @rummage: test_struct
 }
 
@@ -41,13 +41,13 @@ void test_array() {
 }
 
 struct NotAPointer {
-    bool deref;
+    int deref;
 };
 
 void test_pointer() {
     int here = 5;
     int* there = &here;
-    struct NotAPointer not_a_pointer = {.deref = false};
+    struct NotAPointer not_a_pointer = {.deref = 15};
 
     const int len = 10;
     int* array = malloc(len * sizeof(int));
