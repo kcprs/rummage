@@ -1,5 +1,3 @@
-# TODO: This should move to /tests
-
 import logging
 
 from rummage import GlobalFileWriter, StackFrame, VarInfo

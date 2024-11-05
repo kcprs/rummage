@@ -3,7 +3,7 @@ import logging as _logging
 import os as _os
 import sys as _sys
 
-import rummage_hooks as _rummage_hooks
+import rummage_hooks as _rummage_hooks # type: ignore
 
 import rummage as _rummage
 
