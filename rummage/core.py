@@ -1,12 +1,12 @@
 from __future__ import annotations
 
+import importlib
+import inspect
 import logging
 import os
 import re
 import types
 from typing import Any, Iterable, Optional
-import importlib
-import inspect
 
 import lldb
 
@@ -22,6 +22,7 @@ __all__ = [
     "Debugger",
     "GlobalFileWriter",
     "Target",
+    "LaunchConfig",
 ]
 
 
@@ -612,3 +613,9 @@ class Breakpoint:
 
         for b in self._breakpoints:
             b.SetScriptCallbackFunction(cb_name)
+
+
+class LaunchConfig:
+    def __init__(self) -> None:
+        self.exe = None
+        self.args = []

@@ -2,9 +2,6 @@ import logging
 
 from rummage import GlobalFileWriter, StackFrame, VarInfo
 
-EXE = "_build/test_exe"
-ARGS = "arg1 arg2".split(" ")
-
 
 def test_int(frame: StackFrame):
     logging.debug("testing int")

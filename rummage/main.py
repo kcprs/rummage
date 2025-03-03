@@ -1,14 +1,14 @@
 import argparse
+import logging
 import subprocess as sp
 from pathlib import Path
-import logging
 
 import rummage
 
 logging.basicConfig(level=logging.DEBUG)
 
 
-def run(hook_file):
+def run(hook_file, exe, args):
     rummage_dir = Path(rummage.__file__).parent
 
     core_file = rummage_dir / "core.py"
@@ -28,6 +28,12 @@ def run(hook_file):
         f"command script import {hook_file}",
         "--one-line-before-file",
         f"command script import {run_file}",
+        "--one-line-before-file",
+        f"rummage_set_launch_exe {exe}",
+        "--one-line-before-file",
+        f"rummage_set_launch_args {' '.join(args)}",
+        "--one-line-before-file",
+        "rummage_launch",
     ]
     logging.debug(f"Running cmd {cmd}")
     sp.run(cmd)
@@ -38,9 +44,11 @@ def main():
     parser.add_argument(
         "hook_file", help="Path to file containing rummage hook functions"
     )
+    parser.add_argument("exe", help="Path to the executable to be debugged")
+    parser.add_argument("arg", nargs="*", help="Arguments to the debugged executable")
 
     args = parser.parse_args()
-    run(args.hook_file)
+    run(args.hook_file, args.exe, args.arg)
 
 
 if __name__ == "__main__":

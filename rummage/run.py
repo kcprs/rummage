@@ -1,13 +1,15 @@
 import inspect as _inspect
 import logging as _logging
-import os as _os
+import shlex as _shlex
 import sys as _sys
 
-import rummage_hooks as _rummage_hooks # type: ignore
+import rummage_hooks as _rummage_hooks  # type: ignore
 
 import rummage as _rummage
 
 _logging.basicConfig(level=_logging.DEBUG)
+
+_launch_config = _rummage.LaunchConfig()
 
 _this_module = _sys.modules[__name__]
 _hook_funcs = [
@@ -50,7 +52,7 @@ def _create_hook_wrappers():
         setattr(_this_module, hook_func.__name__, make_hook_wrapper())
 
     _logging.debug(f"Module {__name__} has attrs: {dir(_this_module)}")
-    for (name, obj) in _inspect.getmembers(_this_module, _inspect.isfunction):
+    for name, obj in _inspect.getmembers(_this_module, _inspect.isfunction):
         _logging.debug(name)
         _logging.debug(_inspect.signature(obj))
 
@@ -68,10 +70,22 @@ def _set_breakpoints(target: _rummage.Target):
         b.set_callback_via_path(f"{__name__}.{hook_func.__name__}")
 
 
-def _main(debugger):
+def _cmd_set_launch_exe(debugger, exe, *_):
+    _ = debugger
+    _logging.debug(f"Setting launch exe to: {exe}")
+    _launch_config.exe = exe
+
+
+def _cmd_set_launch_args(debugger, args, *_):
+    _ = debugger
+    _logging.debug(f"Setting launch args to: {args}")
+    _launch_config.args = _shlex.split(args)
+
+
+def _cmd_launch(debugger, *_):
     debugger.SetAsync(False)
 
-    target = debugger.CreateTarget(_rummage_hooks.EXE)
+    target = debugger.CreateTarget(_launch_config.exe)
 
     _set_breakpoints(_rummage.Target(target))
 
@@ -83,21 +97,21 @@ def _main(debugger):
         # This is not a problem if we set ALL breakpoints to auto-continue.
         # Otherwise, we have to switch to async mode and periodically check process status.
         _logging.debug("Launching debug target")
-        target.LaunchSimple(_rummage_hooks.ARGS, None, ".")
+        target.LaunchSimple(_launch_config.args, None, ".")
 
 
 def __lldb_init_module(debugger, *_):
-    _main(debugger)
+    debugger.HandleCommand(
+        "command script add -f run._cmd_set_launch_exe rummage_set_launch_exe"
+    )
+    debugger.HandleCommand(
+        "command script add -f run._cmd_set_launch_args rummage_set_launch_args"
+    )
+    debugger.HandleCommand("command script add -f run._cmd_launch rummage_launch")
 
 
 # Just to suppress "unused private function" lints
 __lldb_init_module = __lldb_init_module
-
-
-if __name__ == "__main__":
-    rel_path = _os.path.relpath(_os.path.abspath(__file__), _os.getcwd())
-    print("This script can only be used within an interactive lldb session.")
-    print("You can run it with this one-liner:\n")
-    # TODO: outdated help
-    print(f"    lldb --one-line-before-file 'command script import {rel_path}'")
-    _sys.exit()
+_cmd_set_launch_exe = _cmd_set_launch_exe
+_cmd_set_launch_args = _cmd_set_launch_args
+_cmd_launch = _cmd_launch
