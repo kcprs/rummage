@@ -102,12 +102,12 @@ def _cmd_launch(debugger, *_):
 
 def __lldb_init_module(debugger, *_):
     debugger.HandleCommand(
-        "command script add -f run._cmd_set_launch_exe rummage_set_launch_exe"
+        "command script add -f launch._cmd_set_launch_exe rummage_set_launch_exe"
     )
     debugger.HandleCommand(
-        "command script add -f run._cmd_set_launch_args rummage_set_launch_args"
+        "command script add -f launch._cmd_set_launch_args rummage_set_launch_args"
     )
-    debugger.HandleCommand("command script add -f run._cmd_launch rummage_launch")
+    debugger.HandleCommand("command script add -f launch._cmd_launch rummage_launch")
 
 
 # Just to suppress "unused private function" lints

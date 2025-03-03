@@ -12,7 +12,7 @@ def run(hook_file, exe, args):
     rummage_dir = Path(rummage.__file__).parent
 
     core_file = rummage_dir / "core.py"
-    run_file = rummage_dir / "run.py"
+    launch_file = rummage_dir / "launch.py"
 
     hook_file_name = Path(hook_file).name
     # TODO: Figure out customizable names
@@ -27,7 +27,7 @@ def run(hook_file, exe, args):
         "--one-line-before-file",
         f"command script import {hook_file}",
         "--one-line-before-file",
-        f"command script import {run_file}",
+        f"command script import {launch_file}",
         "--one-line-before-file",
         f"rummage_set_launch_exe {exe}",
         "--one-line-before-file",
