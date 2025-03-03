@@ -5,7 +5,8 @@ import logging
 
 import rummage
 
-# logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
+
 
 def run(hook_file):
     rummage_dir = Path(rummage.__file__).parent
@@ -18,16 +19,16 @@ def run(hook_file):
     assert hook_file_name == "rummage_hooks.py"
 
     cmd = [
-            "lldb",
-            "-b",
-            "-Q",
-            "-O",
-            f"command script import {core_file}",
-            "-O",
-            f"command script import {hook_file}",
-            "-O",
-            f"command script import {run_file}",
-        ]
+        "lldb",
+        "--batch",
+        # "--source-quietly",
+        "--one-line-before-file",
+        f"command script import {core_file}",
+        "--one-line-before-file",
+        f"command script import {hook_file}",
+        "--one-line-before-file",
+        f"command script import {run_file}",
+    ]
     logging.debug(f"Running cmd {cmd}")
     sp.run(cmd)
 

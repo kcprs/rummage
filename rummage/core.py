@@ -5,8 +5,12 @@ import os
 import re
 import types
 from typing import Any, Iterable, Optional
+import importlib
+import inspect
 
 import lldb
+
+print("Loading core.py")
 
 __all__ = [
     "Location",
@@ -597,5 +601,14 @@ class Breakpoint:
 
     def set_callback_via_path(self, cb_name: str):
         logging.debug(f"Breakpoint: adding callback {cb_name}")
+
+        mod, fn = cb_name.split(".")
+        mod = importlib.import_module(mod)
+
+        fn = getattr(mod, fn)
+
+        logging.debug(fn)
+        logging.debug(inspect.signature(fn))
+
         for b in self._breakpoints:
             b.SetScriptCallbackFunction(cb_name)

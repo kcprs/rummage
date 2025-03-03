@@ -7,7 +7,7 @@ import rummage_hooks as _rummage_hooks # type: ignore
 
 import rummage as _rummage
 
-# _logging.basicConfig(level=_logging.DEBUG)
+_logging.basicConfig(level=_logging.DEBUG)
 
 _this_module = _sys.modules[__name__]
 _hook_funcs = [
@@ -50,6 +50,9 @@ def _create_hook_wrappers():
         setattr(_this_module, hook_func.__name__, make_hook_wrapper())
 
     _logging.debug(f"Module {__name__} has attrs: {dir(_this_module)}")
+    for (name, obj) in _inspect.getmembers(_this_module, _inspect.isfunction):
+        _logging.debug(name)
+        _logging.debug(_inspect.signature(obj))
 
 
 # This must be done at module import time so that the wrappers are visible to lldb when the
@@ -72,11 +75,14 @@ def _main(debugger):
 
     _set_breakpoints(_rummage.Target(target))
 
+    _logging.debug(f"_rummage_hooks module has attrs: {dir(_rummage_hooks)}")
+
     # Launch
     with _rummage.GlobalFileWriter():
         # TODO: This blocks only until the debugger stops at a breakpoint.
         # This is not a problem if we set ALL breakpoints to auto-continue.
         # Otherwise, we have to switch to async mode and periodically check process status.
+        _logging.debug("Launching debug target")
         target.LaunchSimple(_rummage_hooks.ARGS, None, ".")
 
 
