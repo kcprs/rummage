@@ -10,19 +10,20 @@ from typing import Any, Iterable, Optional
 
 import lldb
 
-print("Loading core.py")
+logging.basicConfig(level=logging.INFO)
 
 __all__ = [
     "Location",
     "StackFrame",
     "Var",
     "VarInfo",
-    # TODO: Below are actually lib internals, could be moves somwhere else
+    # TODO: Below are actually lib internals, could be moved somewhere else
     "Breakpoint",
     "Debugger",
     "GlobalFileWriter",
     "Target",
     "LaunchConfig",
+    "get_hook_fns",
 ]
 
 
@@ -602,15 +603,6 @@ class Breakpoint:
 
     def set_callback_via_path(self, cb_name: str):
         logging.debug(f"Breakpoint: adding callback {cb_name}")
-
-        mod, fn = cb_name.split(".")
-        mod = importlib.import_module(mod)
-
-        fn = getattr(mod, fn)
-
-        logging.debug(fn)
-        logging.debug(inspect.signature(fn))
-
         for b in self._breakpoints:
             b.SetScriptCallbackFunction(cb_name)
 
@@ -619,3 +611,26 @@ class LaunchConfig:
     def __init__(self) -> None:
         self.exe = None
         self.args = []
+
+
+def get_hook_fns(module):
+    """
+    Retrieve all public function members and their names from a given module.
+
+    Args:
+        module: The module object from which to retrieve function members.
+
+    Returns:
+        A list of tuples, each containing the name of the function and
+        the function object itself.
+    """
+
+    # Note for the future: here we collect names of all function members as they appear as keys in
+    # the members dict of the module. It's important to distinguish between member names and the
+    # __name__ attribute of the members. They are not necessarily equal, e.g. in the case of
+    # hook wrappers that were bolted onto the module using setattr.
+    return [
+        (name, fn)
+        for (name, fn) in inspect.getmembers(module, inspect.isfunction)
+        if not name.startswith("_")
+    ]

@@ -1,6 +1,6 @@
+#include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <assert.h>
 
 typedef struct {
     int num_blorps;
@@ -75,8 +75,8 @@ void run_tests() {
 }
 
 int main(int argc, char** argv) {
-    char* its_an_arg = argv[0]; // @rummage: callback1
-    ImAnInt some_value = 1; // @rummage: callback2
+    char* its_an_arg = argv[0];
+    ImAnInt some_value = 1;
     bool im_a_bool = false;
     float im_a_float = 4.8f;
     float array[] = {1.f, 1.f, 2.f, 3.f};
@@ -89,6 +89,6 @@ int main(int argc, char** argv) {
                               .just_some_chars = "look, it's a string!"};
 
     run_tests();
-    assert(false);
+    assert(!"End of main reached");
     return 0;
 }

@@ -15,7 +15,7 @@ build:
     -mkdir _build
     clang -g -o _build/test_exe main.c
 
-lldb: build # check
+lldb: build check
     rummage tests/rummage_hooks.py _build/test_exe arg1 arg2
 
 raw: build check

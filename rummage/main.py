@@ -1,12 +1,9 @@
 import argparse
-import logging
 import os
 import subprocess as sp
 from pathlib import Path
 
 import rummage
-
-logging.basicConfig(level=logging.DEBUG)
 
 
 def run(hook_file, exe, args):
@@ -39,7 +36,6 @@ def run(hook_file, exe, args):
         "--one-line-before-file",
         "rummage_launch",
     ]
-    logging.debug(f"Running cmd {cmd}")
     sp.run(cmd)
 
 
