@@ -6,7 +6,7 @@ authors = ["Kacper Sagnowski <ksagnowski@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.13"
+python = "^3.12"
 
 [tool.poetry.scripts]
 rummage = "rummage.main:main"
