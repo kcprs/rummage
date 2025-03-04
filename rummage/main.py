@@ -17,25 +17,28 @@ def run(hook_file, exe, args):
     if not hook_file.is_absolute():
         hook_file = Path(os.getcwd()) / hook_file
 
+    # Generate flag to interleave with lldb commands
+    def flag():
+        while True:
+            yield "--one-line-before-file"
+
+    lldb_cmds = [
+        f"command script import {core_file}",
+        f"command script import {wrappers_file}",
+        f"rummage_load_hooks {hook_file}",
+        f"command script import {launch_file}",
+        f"rummage_set_launch_exe {exe}",
+        f"rummage_set_launch_args {' '.join(args)}",
+        "rummage_launch",
+    ]
+
     cmd = [
         "lldb",
         "--batch",
         "--source-quietly",
-        "--one-line-before-file",
-        f"command script import {core_file}",
-        "--one-line-before-file",
-        f"command script import {wrappers_file}",
-        "--one-line-before-file",
-        f"rummage_load_hooks {hook_file}",
-        "--one-line-before-file",
-        f"command script import {launch_file}",
-        "--one-line-before-file",
-        f"rummage_set_launch_exe {exe}",
-        "--one-line-before-file",
-        f"rummage_set_launch_args {' '.join(args)}",
-        "--one-line-before-file",
-        "rummage_launch",
+        *[x for pair in zip(flag(), lldb_cmds) for x in pair],
     ]
+
     sp.run(cmd)
 
 
