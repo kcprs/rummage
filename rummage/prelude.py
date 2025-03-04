@@ -2,8 +2,10 @@ import logging
 import subprocess as sp
 import sys
 
+logging.basicConfig(level=logging.INFO)
 
-def _cmd_load_venv(*_):
+
+def load_venv():
     result = sp.run(
         ["python3", "-c", "import sys;print('\\n'.join(sys.path).strip())"],
         capture_output=True,
@@ -19,11 +21,9 @@ def _cmd_load_venv(*_):
 
 
 def __lldb_init_module(debugger, *_):
-    debugger.HandleCommand(
-        "command script add -f venv._cmd_load_venv rummage_load_venv"
-    )
+    _ = debugger
+    load_venv()
 
 
 # Just to suppress "unused private function" lints
 __lldb_init_module = __lldb_init_module
-_cmd_load_venv = _cmd_load_venv
