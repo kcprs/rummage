@@ -1,5 +1,6 @@
 import argparse
 import logging
+import os
 import subprocess as sp
 from pathlib import Path
 
@@ -12,20 +13,23 @@ def run(hook_file, exe, args):
     rummage_dir = Path(rummage.__file__).parent
 
     core_file = rummage_dir / "core.py"
+    wrappers_file = rummage_dir / "hook_wrappers.py"
     launch_file = rummage_dir / "launch.py"
 
-    hook_file_name = Path(hook_file).name
-    # TODO: Figure out customizable names
-    assert hook_file_name == "rummage_hooks.py"
+    hook_file = Path(hook_file)
+    if not hook_file.is_absolute():
+        hook_file = Path(os.getcwd()) / hook_file
 
     cmd = [
         "lldb",
         "--batch",
-        # "--source-quietly",
+        "--source-quietly",
         "--one-line-before-file",
         f"command script import {core_file}",
         "--one-line-before-file",
-        f"command script import {hook_file}",
+        f"command script import {wrappers_file}",
+        "--one-line-before-file",
+        f"rummage_load_hooks {hook_file}",
         "--one-line-before-file",
         f"command script import {launch_file}",
         "--one-line-before-file",
