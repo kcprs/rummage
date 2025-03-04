@@ -10,6 +10,7 @@ def run(hook_file, exe, args):
     rummage_dir = Path(rummage.__file__).parent
 
     core_file = rummage_dir / "core.py"
+    venv_file = rummage_dir / "venv.py"
     wrappers_file = rummage_dir / "hook_wrappers.py"
     launch_file = rummage_dir / "launch.py"
 
@@ -24,6 +25,8 @@ def run(hook_file, exe, args):
 
     lldb_cmds = [
         f"command script import {core_file}",
+        f"command script import {venv_file}",
+        "rummage_load_venv",
         f"command script import {wrappers_file}",
         f"rummage_load_hooks {hook_file}",
         f"command script import {launch_file}",
