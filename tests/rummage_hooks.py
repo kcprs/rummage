@@ -3,7 +3,7 @@ import logging
 from rummage import GlobalFileWriter, StackFrame, VarInfo
 
 
-def test_int(frame: StackFrame):
+def test_int(frame: StackFrame, *_):
     logging.debug("testing int")
     one = frame.var("one")
     assert one > 0
@@ -12,7 +12,7 @@ def test_int(frame: StackFrame):
     assert str(VarInfo(one)) == "<(int) one = 1>"
 
 
-def test_float(frame: StackFrame):
+def test_float(frame: StackFrame, *_):
     logging.debug("testing float")
     half = frame.var("half")
     assert half == 0.5
@@ -21,7 +21,7 @@ def test_float(frame: StackFrame):
     assert str(half) == str(0.5)
 
 
-def test_bool(frame: StackFrame):
+def test_bool(frame: StackFrame, *_):
     logging.debug("testing bool")
     truth = frame.var("truth")
     lie = frame.var("lie")
@@ -31,7 +31,7 @@ def test_bool(frame: StackFrame):
     assert str(lie) == str(False)
 
 
-def test_struct(frame: StackFrame):
+def test_struct(frame: StackFrame, *_):
     logging.debug("testing struct")
     a_struct = frame.var("a_struct")
     assert hasattr(a_struct, "a")
@@ -44,7 +44,7 @@ def test_struct(frame: StackFrame):
     assert str(VarInfo(a_struct)) == "<(TestStruct) a_struct = (a = 1, b = 3.5)>"
 
 
-def test_array(frame: StackFrame):
+def test_array(frame: StackFrame, *_):
     logging.debug("testing array")
     array = frame.var("multiplicity")
     assert array[0] == 1
@@ -54,7 +54,7 @@ def test_array(frame: StackFrame):
         assert num == array[i]
 
 
-def test_pointer(frame: StackFrame):
+def test_pointer(frame: StackFrame, *_):
     logging.debug("testing pointer")
     there = frame.var("there")
     pointee = there.deref()

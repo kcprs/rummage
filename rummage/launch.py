@@ -2,6 +2,7 @@ import logging
 import shlex
 
 import hook_wrappers  # type: ignore
+import lldb
 
 import rummage
 
@@ -33,6 +34,15 @@ def _cmd_set_launch_args(debugger, args, *_):
 def _cmd_launch(debugger, *_):
     debugger.SetAsync(False)
     target = debugger.CreateTarget(LAUNCH_CONFIG.exe)
+
+    # Setting launch info before setting breakpoints so that args are already known as they are
+    # passed to breakpoint callbacks through extra_args.
+    #
+    # TODO: Figure out a way to pass references to Python objects via extra_args so that the most
+    # up-to-date state is available in callbacks.
+    launch_info = lldb.SBLaunchInfo(LAUNCH_CONFIG.args)
+    target.SetLaunchInfo(launch_info)
+
     set_breakpoints(rummage.Target(target))
 
     # Launch
@@ -41,7 +51,8 @@ def _cmd_launch(debugger, *_):
         # This is not a problem if we set ALL breakpoints to auto-continue.
         # Otherwise, we have to switch to async mode and periodically check process status.
         logging.info("Launching debug target")
-        target.LaunchSimple(LAUNCH_CONFIG.args, None, ".")
+        e = lldb.SBError()
+        target.Launch(launch_info, e)
 
 
 def __lldb_init_module(debugger, *_):

@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import inspect
+import json
 import logging
 import os
 import re
 import types
-from typing import Any, Iterable, Optional
+from typing import Any, Iterable, List, Optional
 
 import lldb
 
@@ -552,6 +553,18 @@ class Target:
             x.extend(module.compile_unit_iter())
         return x
 
+    @property
+    def exe(self) -> str:
+        return self._inner.GetExecutable().fullpath
+
+    @property
+    def args(self) -> List[str]:
+        launch_info = self._inner.GetLaunchInfo()
+        return list(
+            launch_info.GetArgumentAtIndex(i)
+            for i in range(launch_info.GetNumArguments())
+        )
+
 
 class Breakpoint:
     def __init__(self, target: Target):
@@ -601,7 +614,16 @@ class Breakpoint:
     def set_callback_via_path(self, cb_name: str):
         logging.debug(f"Breakpoint: adding callback {cb_name}")
         for b in self._breakpoints:
-            b.SetScriptCallbackFunction(cb_name)
+            extra_args = lldb.SBStructuredData()
+            extra_args.SetFromJSON(
+                json.dumps(
+                    {
+                        "exe": self._target.exe,
+                        "args": self._target.args,
+                    }
+                )
+            )
+            b.SetScriptCallbackFunction(cb_name, extra_args)
 
 
 class LaunchConfig:

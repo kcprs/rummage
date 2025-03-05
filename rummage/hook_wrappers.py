@@ -1,6 +1,9 @@
 import importlib.util as _import_util
+import json as _json
 import logging as _logging
 import sys as _sys
+
+import lldb as _lldb
 
 import rummage as _rummage
 
@@ -48,11 +51,22 @@ def _create_hook_wrappers(hook_module):
         # `hook_fns` due to late binding in Python closures.
         def add_hook_wrapper(name=name, fn=fn):
             # We ignore args other than `frame`
-            def hook_wrapper(frame, *_):
+            def hook_wrapper(
+                frame: _lldb.SBFrame,
+                bp_loc: _lldb.SBBreakpointLocation,
+                extra_args: _lldb.SBStructuredData,
+                *_,
+            ):
                 _logging.info(f"Executing hook wrapper for hook {name}")
+
+                # TODO: pass Python objects into hooks, e.g. a Target instance
+                stream = _lldb.SBStream()
+                extra_args.GetAsJSON(stream)
+                extra_dict = _json.loads(stream.GetData())
+
                 # Returning False tells lldb not to stop at the breakpoint.
                 # Hook functions may return a truthy value to request stopping at the breakpoint.
-                return bool(fn(_rummage.StackFrame(frame)))
+                return bool(fn(_rummage.StackFrame(frame), extra_dict))
 
             _logging.debug(
                 f"Adding hook wrapper to {_this_module}; "
