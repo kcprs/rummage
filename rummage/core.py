@@ -9,8 +9,6 @@ from typing import Any, Iterable, Optional
 
 import lldb
 
-logging.basicConfig(level=logging.INFO)
-
 __all__ = [
     "Location",
     "StackFrame",
