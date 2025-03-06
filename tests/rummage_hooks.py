@@ -70,6 +70,8 @@ def test_pointer(frame: StackFrame, *_):
     assert str(string) == "Lorem Ipsum"
     assert str(frame.var("c")) == "c"
     assert str(frame.var("long_text")) == "Lorem ipsum dolor si..."
+    billion_dollar_mistake = frame.var("billion_dollar_mistake")
+    assert billion_dollar_mistake.is_null()
 
 
 def tests_done(*_):

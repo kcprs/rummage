@@ -60,6 +60,8 @@ void test_pointer() {
     const char* text = "Lorem Ipsum";
     const char* long_text = "Lorem ipsum dolor sit amet";
 
+    const int* billion_dollar_mistake = NULL;
+
     (void)0;  // @rummage: test_pointer
     free(array);
 }

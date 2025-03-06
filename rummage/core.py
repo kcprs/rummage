@@ -282,9 +282,11 @@ class Var:
         if child_sbvalue and child_sbvalue.IsValid():
             return Var(child_sbvalue)
 
-        # If there are no members called "deref", emulate a "deref" method for convenience.
+        # If member of underlying variable don't clash, emulate methods on the Var object
         if name == "deref":
             return types.MethodType(deref, self)
+        if name == "is_null":
+            return types.MethodType(is_null, self)
 
         raise AttributeError(f"Attribute '{name}' is not defined")
 
@@ -439,6 +441,14 @@ def deref(var: Var) -> Var:
         raise ValueError(f"Can't dereference a variable of type {type_.name}")
 
     return Var(var._sb_value.Dereference())
+
+
+def is_null(var: Var) -> bool:
+    type_ = VarInfo(var).canonical_type
+    if not type_.is_pointer:
+        raise ValueError(f"Variable of type {type_.name} can't be NULL")
+
+    return var == 0
 
 
 class VarInfo:
