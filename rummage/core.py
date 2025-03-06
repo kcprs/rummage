@@ -11,7 +11,8 @@ from typing import Any, Iterable, List, Optional
 import lldb
 
 __all__ = [
-    "Location",
+    "BreakpointLocation",
+    "LineLocation",
     "StackFrame",
     "Var",
     "VarInfo",
@@ -478,14 +479,37 @@ class StackFrame:
         line_entry = self._inner.GetLineEntry()
         file_path = line_entry.GetFileSpec().GetFilename()
         line_number = line_entry.GetLine()
-        return Location(file_path, line_number)
+        return LineLocation(file_path, line_number)
 
     def eval(self, expr: str) -> lldb.SBValue:
         # TODO: if value.IsValid() and value.GetError().Success():
         return self._inner.EvaluateExpression(expr)
 
 
-class Location:
+class BreakpointLocation:
+    def __init__(self, bp_loc: lldb.SBBreakpointLocation) -> None:
+        self._inner = bp_loc
+
+    @property
+    def line_location(self) -> LineLocation:
+        address = self._inner.GetAddress()
+        line_entry = address.GetLineEntry()
+        file_spec = line_entry.GetFileSpec()
+
+        file_path = file_spec.GetDirectory() + "/" + file_spec.GetFilename()
+        line_number = line_entry.GetLine()
+        return LineLocation(file_path, line_number)
+
+    @property
+    def hit_count(self) -> int:
+        return self._inner.GetHitCount()
+
+    def __str__(self) -> str:
+        attrs = ["line_location", "hit_count"]
+        return f"<BreakpointLocation ({', '.join(f'{attr}: {getattr(self, attr)}' for attr in attrs)})>"
+
+
+class LineLocation:
     def __init__(self, file_path, line_number) -> None:
         self._file_path = file_path
         self._line_number = line_number

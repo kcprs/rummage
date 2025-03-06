@@ -64,11 +64,15 @@ def _create_hook_wrappers(hook_module):
                 extra_args.GetAsJSON(stream)
                 extra_dict = _json.loads(stream.GetData())
 
-                # TODO: pass info from bp_loc into hook. Useful info is e.g. hit count
-
                 # Returning False tells lldb not to stop at the breakpoint.
                 # Hook functions may return a truthy value to request stopping at the breakpoint.
-                return bool(fn(_rummage.StackFrame(frame), extra_dict))
+                return bool(
+                    fn(
+                        _rummage.StackFrame(frame),
+                        _rummage.BreakpointLocation(bp_loc),
+                        extra_dict,
+                    )
+                )
 
             _logging.debug(
                 f"Adding hook wrapper to {_this_module}; "
