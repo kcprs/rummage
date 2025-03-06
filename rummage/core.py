@@ -480,6 +480,10 @@ class StackFrame:
         line_number = line_entry.GetLine()
         return Location(file_path, line_number)
 
+    def eval(self, expr: str) -> lldb.SBValue:
+        # TODO: if value.IsValid() and value.GetError().Success():
+        return self._inner.EvaluateExpression(expr)
+
 
 class Location:
     def __init__(self, file_path, line_number) -> None:
