@@ -4,9 +4,8 @@ from rummage import StackFrame, VarInfo, BreakpointLocation
 import rummage
 
 
-def _on_hook_enter(frame: StackFrame, bp_loc: BreakpointLocation, extra_dict):
-    _ = frame, bp_loc, extra_dict
-    logging.debug("_on_hook_enter called")
+def _on_hook_enter(bp_loc: BreakpointLocation, *_):
+    logging.debug(f"_on_hook_enter called at {bp_loc}")
 
 
 rummage.callbacks.on_hook_enter = _on_hook_enter
