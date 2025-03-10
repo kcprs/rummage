@@ -4,14 +4,14 @@ from rummage import StackFrame, VarInfo, BreakpointLocation
 import rummage
 
 
-def _on_hook_enter(bp_loc: BreakpointLocation, *_):
+def _on_hook_enter(bp_loc: BreakpointLocation, **_):
     logging.debug(f"_on_hook_enter called at {bp_loc}")
 
 
 rummage.callbacks.on_hook_enter = _on_hook_enter
 
 
-def test_int(frame: StackFrame, *_):
+def test_int(frame: StackFrame, **_):
     logging.debug("testing int")
     one = frame.var("one")
     assert one > 0
@@ -20,7 +20,7 @@ def test_int(frame: StackFrame, *_):
     assert str(VarInfo(one)) == "<(int) one = 1>"
 
 
-def test_float(frame: StackFrame, *_):
+def test_float(frame: StackFrame, **_):
     logging.debug("testing float")
     half = frame.var("half")
     assert half == 0.5
@@ -29,7 +29,7 @@ def test_float(frame: StackFrame, *_):
     assert str(half) == str(0.5)
 
 
-def test_bool(frame: StackFrame, *_):
+def test_bool(frame: StackFrame, **_):
     logging.debug("testing bool")
     truth = frame.var("truth")
     lie = frame.var("lie")
@@ -39,7 +39,7 @@ def test_bool(frame: StackFrame, *_):
     assert str(lie) == str(False)
 
 
-def test_struct(frame: StackFrame, *_):
+def test_struct(frame: StackFrame, **_):
     logging.debug("testing struct")
     a_struct = frame.var("a_struct")
     assert hasattr(a_struct, "a")
@@ -52,7 +52,7 @@ def test_struct(frame: StackFrame, *_):
     assert str(VarInfo(a_struct)) == "<(TestStruct) a_struct = (a = 1, b = 3.5)>"
 
 
-def test_array(frame: StackFrame, *_):
+def test_array(frame: StackFrame, **_):
     logging.debug("testing array")
     array = frame.var("multiplicity")
     assert array[0] == 1
@@ -62,7 +62,7 @@ def test_array(frame: StackFrame, *_):
         assert num == array[i]
 
 
-def test_pointer(frame: StackFrame, *_):
+def test_pointer(frame: StackFrame, **_):
     logging.debug("testing pointer")
     there = frame.var("there")
     pointee = there.deref()
@@ -82,5 +82,5 @@ def test_pointer(frame: StackFrame, *_):
     assert billion_dollar_mistake.is_null()
 
 
-def tests_done(*_):
+def tests_done(**_):
     logging.debug("Tests passed")
