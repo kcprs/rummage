@@ -1,6 +1,15 @@
 import logging
 
-from rummage import GlobalFileWriter, StackFrame, VarInfo
+from rummage import StackFrame, VarInfo, BreakpointLocation
+import rummage
+
+
+def _on_hook_enter(frame: StackFrame, bp_loc: BreakpointLocation, extra_dict):
+    _ = frame, bp_loc, extra_dict
+    logging.debug("_on_hook_enter called")
+
+
+rummage.callbacks.on_hook_enter = _on_hook_enter
 
 
 def test_int(frame: StackFrame, *_):

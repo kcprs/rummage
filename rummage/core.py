@@ -16,10 +16,10 @@ __all__ = [
     "StackFrame",
     "Var",
     "VarInfo",
+    "GlobalFileWriter",
     # TODO: Below are actually lib internals, could be moved somewhere else
     "Breakpoint",
     "Debugger",
-    "GlobalFileWriter",
     "Target",
     "LaunchConfig",
     "get_hook_fns",

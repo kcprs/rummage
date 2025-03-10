@@ -64,12 +64,17 @@ def _create_hook_wrappers(hook_module):
                 extra_args.GetAsJSON(stream)
                 extra_dict = _json.loads(stream.GetData())
 
+                r_frame = _rummage.StackFrame(frame)
+                r_bp_loc = _rummage.BreakpointLocation(bp_loc)
+
+                _rummage.callbacks.on_hook_enter(r_frame, r_bp_loc, extra_dict)
+
                 # Returning False tells lldb not to stop at the breakpoint.
                 # Hook functions may return a truthy value to request stopping at the breakpoint.
                 return bool(
                     fn(
-                        _rummage.StackFrame(frame),
-                        _rummage.BreakpointLocation(bp_loc),
+                        r_frame,
+                        r_bp_loc,
                         extra_dict,
                     )
                 )
