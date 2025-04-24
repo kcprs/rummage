@@ -15,7 +15,7 @@ def set_breakpoints(target: rummage.Target):
     hook_fn_names = [name for (name, _) in rummage.get_hook_fns(hook_wrappers)]
 
     for cb_name in hook_fn_names:
-        b = rummage.Breakpoint.from_regex(target, r"@rummage\s*:\s*" + cb_name + "$")
+        b = rummage.Breakpoint.from_regex(target, r"@rummage\s*:\s*" + cb_name)
         b.set_callback_via_path(f"{hook_wrappers.__name__}.{cb_name}")
 
 
