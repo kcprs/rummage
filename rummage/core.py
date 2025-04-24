@@ -456,10 +456,13 @@ def is_null(var: Var) -> bool:
 def as_array(var: Var, len: int) -> Var:
     type_ = var._sb_value.GetType()
     if not type_.IsPointerType():
-        raise ValueError(f"Can't cast a variable of type {type_.GetName()} to an array.")
+        raise ValueError(
+            f"Can't cast a variable of type {type_.GetName()} to an array."
+        )
 
     return Var(
-        var._sb_value.Cast(type_.GetPointeeType().GetArrayType(len))
+        # Not sure why the deref, but it fixes tests...
+        var._sb_value.Dereference().Cast(type_.GetPointeeType().GetArrayType(len))
     )
 
 

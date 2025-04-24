@@ -75,6 +75,7 @@ def test_pointer(frame: StackFrame, **_):
     num_checked = 0
     for i, num in enumerate(ptr_array):
         assert num == ptr_array[i]
+        assert num == i + 1
         num_checked += 1
     assert len(ptr_array) == 1
     assert num_checked == 1
@@ -83,6 +84,7 @@ def test_pointer(frame: StackFrame, **_):
     num_checked = 0
     for i, num in enumerate(as_array):
         assert num == as_array[i]
+        assert num == i + 1
         num_checked += 1
     assert len(as_array) == 10
     assert num_checked == 10
