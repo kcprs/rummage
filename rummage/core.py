@@ -287,6 +287,8 @@ class Var:
             return types.MethodType(deref, self)
         if name == "is_null":
             return types.MethodType(is_null, self)
+        if name == "as_array":
+            return types.MethodType(as_array, self)
 
         raise AttributeError(f"Attribute '{name}' is not defined")
 
@@ -449,6 +451,16 @@ def is_null(var: Var) -> bool:
         raise ValueError(f"Variable of type {type_.name} can't be NULL")
 
     return var == 0
+
+
+def as_array(var: Var, len: int) -> Var:
+    type_ = var._sb_value.GetType()
+    if not type_.IsPointerType():
+        raise ValueError(f"Can't cast a variable of type {type_.GetName()} to an array.")
+
+    return Var(
+        var._sb_value.Cast(type_.GetPointeeType().GetArrayType(len))
+    )
 
 
 class VarInfo:

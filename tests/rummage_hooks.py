@@ -70,10 +70,23 @@ def test_pointer(frame: StackFrame, **_):
     not_a_pointer = frame.var("not_a_pointer")
     member_not_pointee = not_a_pointer.deref
     assert member_not_pointee == 15
+
     ptr_array = frame.var("array")
+    num_checked = 0
     for i, num in enumerate(ptr_array):
         assert num == ptr_array[i]
+        num_checked += 1
     assert len(ptr_array) == 1
+    assert num_checked == 1
+
+    as_array = ptr_array.as_array(10)
+    num_checked = 0
+    for i, num in enumerate(as_array):
+        assert num == as_array[i]
+        num_checked += 1
+    assert len(as_array) == 10
+    assert num_checked == 10
+
     string = frame.var("text")
     assert str(string) == "Lorem Ipsum"
     assert str(frame.var("c")) == "c"
