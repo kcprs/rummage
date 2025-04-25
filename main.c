@@ -53,8 +53,9 @@ void test_pointer() {
     const int len = 10;
     int* array = malloc(len * sizeof(int));
     for (int i = 0; i < len; ++i) {
-        array[i] = i + 1;
+        array[i] = 2 * i + 1;
     }
+    int* mid_array = array + 5;
 
     const char c = 'c';
     const char* text = "Lorem Ipsum";
