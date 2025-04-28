@@ -1,7 +1,15 @@
 import logging
 
-from rummage import StackFrame, VarInfo, BreakpointLocation
 import rummage
+from rummage import BreakpointLocation, StackFrame, VarInfo
+
+ON_LAUNCH_CALLED = False
+
+
+def _on_target_launch(debugger):
+    _ = debugger
+    global ON_LAUNCH_CALLED
+    ON_LAUNCH_CALLED = True
 
 
 def _on_hook_enter(bp_loc: BreakpointLocation, **_):

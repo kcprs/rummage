@@ -52,6 +52,7 @@ def _cmd_launch(debugger, *_):
         # Otherwise, we have to switch to async mode and periodically check process status.
         logging.info("Launching debug target")
         e = lldb.SBError()
+        rummage.callbacks.on_target_launch(debugger)
         target.Launch(launch_info, e)
 
 
