@@ -68,9 +68,7 @@ def _create_hook_wrappers(hook_module):
                 r_bp_loc = _rummage.BreakpointLocation(bp_loc)
 
                 _rummage.callbacks.on_hook_enter(
-                    frame=r_frame,
-                    bp_loc=r_bp_loc,
-                    extra=extra_dict
+                    frame=r_frame, bp_loc=r_bp_loc, extra=extra_dict
                 )
 
                 # Returning False tells lldb not to stop at the breakpoint.

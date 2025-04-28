@@ -17,6 +17,7 @@ def _on_hook_enter(bp_loc: BreakpointLocation, **_):
 
 
 rummage.callbacks.on_hook_enter = _on_hook_enter
+rummage.callbacks.on_target_launch = _on_target_launch
 
 
 def test_int(frame: StackFrame, **_):
@@ -89,7 +90,7 @@ def test_pointer(frame: StackFrame, **_):
     assert num_checked == 1
 
     mid_array = frame.var("mid_array")
-    assert mid_array - ptr_array == 4 * 5 # difference in bytes
+    assert mid_array - ptr_array == 4 * 5  # difference in bytes
 
     as_array = ptr_array.as_array(10)
     num_checked = 0
@@ -109,4 +110,5 @@ def test_pointer(frame: StackFrame, **_):
 
 
 def tests_done(**_):
+    assert ON_LAUNCH_CALLED
     logging.debug("Tests passed")
