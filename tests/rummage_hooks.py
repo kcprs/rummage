@@ -12,8 +12,8 @@ def _on_target_launch(debugger):
     ON_LAUNCH_CALLED = True
 
 
-def _on_hook_enter(bp_loc: BreakpointLocation, **_):
-    logging.debug(f"_on_hook_enter called at {bp_loc}")
+def _on_hook_enter(bp_loc: BreakpointLocation, extra, **_):
+    logging.debug(f"_on_hook_enter called for hook {extra['hook_name']} at {bp_loc}")
 
 
 rummage.callbacks.on_hook_enter = _on_hook_enter

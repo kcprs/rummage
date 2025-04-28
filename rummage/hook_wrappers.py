@@ -63,6 +63,7 @@ def _create_hook_wrappers(hook_module):
                 stream = _lldb.SBStream()
                 extra_args.GetAsJSON(stream)
                 extra_dict = _json.loads(stream.GetData())
+                extra_dict["hook_name"] = name
 
                 r_frame = _rummage.StackFrame(frame)
                 r_bp_loc = _rummage.BreakpointLocation(bp_loc)
